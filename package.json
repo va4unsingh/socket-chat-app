@@ -1,5 +1,5 @@
 {
-  "name": "socket-chat-app",
+  "name": "excalidraw_clone",
   "private": true,
   "scripts": {
     "build": "turbo run build",
