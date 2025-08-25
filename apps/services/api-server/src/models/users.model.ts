@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 interface IUser extends Document {
   firstname: string;
@@ -100,6 +101,14 @@ const userSchema = new mongoose.Schema<IUser>(
 
 userSchema.index({ email: 1, isVerified: 1 });
 
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
+userSchema.methods.isPasswordCorrect = async function (password: any) {
+  return await bcrypt.compare(password, this.password);
+};
 export const User = mongoose.model<IUser>("User", userSchema);
 
 export type { IUser };
