@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 interface IUser extends Document {
   firstname: string;
@@ -109,6 +110,17 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.isPasswordCorrect = async function (password: any) {
   return await bcrypt.compare(password, this.password);
 };
+
+userSchema.methods.generateAccessToken = async function () {};
+
+userSchema.methods.generateRefreshToken = async function () {};
+
+userSchema.methods.clearRefreshToken = async function () {};
+
+userSchema.methods.generateVerificationToken = async function () {};
+
+userSchema.methods.generatePasswordResetToken = async function () {};
+
 export const User = mongoose.model<IUser>("User", userSchema);
 
 export type { IUser };
