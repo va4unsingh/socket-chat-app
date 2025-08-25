@@ -8,7 +8,15 @@ import userRouter from "./routes/auth.routes";
 const app = express();
 const PORT = process.env.PORT;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.BASE_URL,
+    credentials: true,
+    methods: ["GET", "POST", "DELETE", "PUT", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 
 dbConnect();

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -19,6 +19,13 @@ interface IUser extends Document {
   refreshTokenExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
+
+  isPasswordCorrect(password: string): Promise<boolean>;
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
+  clearRefreshToken(): Promise<void>;
+  generateVerificationToken(): string;
+  generatePasswordResetToken(): string;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -87,6 +94,7 @@ const userSchema = new mongoose.Schema<IUser>(
     },
 
     verificationTokenExpires: Date,
+
     resetPasswordToken: {
       type: String,
       index: true,
@@ -108,11 +116,11 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-userSchema.methods.isPasswordCorrect = async function (password: any) {
+userSchema.methods.isPasswordCorrect = async function (password: string) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateAccessToken = function () {
+userSchema.methods.generateAccessToken = function (): string {
   return jwt.sign(
     {
       _id: this._id,
@@ -129,7 +137,7 @@ userSchema.methods.generateAccessToken = function () {
   );
 };
 
-userSchema.methods.generateRefreshToken = function () {
+userSchema.methods.generateRefreshToken = function (): string {
   return jwt.sign(
     {
       _id: this._id,
@@ -141,19 +149,19 @@ userSchema.methods.generateRefreshToken = function () {
   );
 };
 
-userSchema.methods.clearRefreshToken = async function () {
+userSchema.methods.clearRefreshToken = async function (): Promise<void> {
   this.refreshToken = undefined;
   this.refreshTokenExpires = undefined;
 };
 
-userSchema.methods.generateVerificationToken = function () {
+userSchema.methods.generateVerificationToken = function (): string {
   const token = crypto.randomBytes(32).toString("hex");
   this.verificationToken = token;
   this.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24hr
   return token;
 };
 
-userSchema.methods.generatePasswordResetToken = function () {
+userSchema.methods.generatePasswordResetToken = function (): string {
   const resetToken = crypto.randomBytes(32).toString("hex");
   this.resetPasswordToken = crypto
     .createHash("sha256")
