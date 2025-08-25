@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 
 const generateAccessAndRefreshTokens = async (userId: string) => {
   try {
-    const user = await User.findById({ userId });
+    const user = await User.findById(userId);
     if (!user) {
       throw new Error(`User with ID ${userId} not found`);
     }
@@ -145,6 +145,13 @@ const signIn = async (req: Request, res: Response) => {
       });
     }
 
+    if (!user.isVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before signing in",
+        success: false,
+      });
+    }
+
     const isPasswordValid = await user.isPasswordCorrect(password);
 
     if (!isPasswordValid) {
@@ -179,7 +186,7 @@ const signIn = async (req: Request, res: Response) => {
         .cookie("refreshToken", refreshToken, refreshTokenOptions)
         .cookie("accessToken", accessToken, accessTokenOptions)
         .json({
-          message: "User logged in Successfully",
+          message: "Login successful, Your email is verified.",
           user: loggedInUser,
         });
     } catch (tokenError) {
@@ -197,3 +204,5 @@ const signIn = async (req: Request, res: Response) => {
     });
   }
 };
+
+export { signUp, signIn };

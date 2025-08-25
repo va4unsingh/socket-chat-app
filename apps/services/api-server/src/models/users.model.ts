@@ -120,6 +120,9 @@ userSchema.methods.isPasswordCorrect = async function (password: string) {
   return await bcrypt.compare(password, this.password);
 };
 
+const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || "15m";
+const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || "7d";
+
 userSchema.methods.generateAccessToken = function (): string {
   return jwt.sign(
     {
@@ -132,7 +135,7 @@ userSchema.methods.generateAccessToken = function (): string {
     },
     process.env.ACCESS_TOKEN_SECRET!,
     {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "15m",
+      expiresIn: ACCESS_TOKEN_EXPIRY as any,
     }
   );
 };
@@ -144,7 +147,7 @@ userSchema.methods.generateRefreshToken = function (): string {
     },
     process.env.REFRESH_TOKEN_SECRET!,
     {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY || "7d",
+      expiresIn: REFRESH_TOKEN_EXPIRY as any,
     }
   );
 };
