@@ -238,7 +238,7 @@ const signIn = async (req: Request, res: Response) => {
 
       // Get user without sensitive data
       const loggedInUser = await User.findById(user._id).select(
-        "-refreshToken -password"
+        "-refreshTokens"
       );
 
       const refreshTokenOptions = {
@@ -415,6 +415,7 @@ const refreshAccessToken = async (req: Request, res: Response) => {
       .json({
         message: "Access token refreshed",
         success: true,
+        accessToken: newAccessToken,
       });
   } catch (error) {
     console.error("Refresh token:", error);
@@ -425,4 +426,4 @@ const refreshAccessToken = async (req: Request, res: Response) => {
   }
 };
 
-export { signUp, signIn, verifyUser, logout, refreshAccessToken };
+export { signUp, signIn, verifyUser, logout, refreshAccessToken, logoutAll };
