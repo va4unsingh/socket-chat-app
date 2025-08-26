@@ -23,18 +23,27 @@ interface IUser extends Document {
   verificationTokenExpires?: Date;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  
   // All refresh token info is here
   refreshTokens: RefreshTokenData[];
 
   createdAt: Date;
   updatedAt: Date;
 
+  // Existing authentication methods
   isPasswordCorrect(password: string): Promise<boolean>;
   generateAccessToken(): string;
   generateRefreshToken(): string;
-  clearRefreshToken(): Promise<void>;
   generateVerificationToken(): string;
   generatePasswordResetToken(): string;
+  
+  // New refresh token management methods
+  addRefreshToken(token: string, device?: string): void;
+  removeRefreshToken(tokenToRemove: string): void;
+  clearAllRefreshTokens(): void;
+  cleanupExpiredTokens(): void;
+  hasValidRefreshToken(token: string): boolean;
+  getActiveSessionsCount(): number;
 }
 
 const userSchema = new mongoose.Schema<IUser>(

@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshTokens = async (
   userId: string,
-  deviceInfo?: string
+  deviceInfo: string = "unknown"
 ) => {
   try {
     const user = await User.findById(userId);
@@ -16,24 +16,14 @@ const generateAccessAndRefreshTokens = async (
       throw new Error(`User with ID ${userId} not found`);
     }
 
+    // Clean up any expired tokens first
+    user.cleanupExpiredTokens();
+
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
-    // Calculate expiration date based on REFRESH_TOKEN_EXPIRY (7d default)
-    const refreshTokenExpiryMs = 7 * 24 * 60 * 60 * 1000;
-    const expiresAt = new Date(Date.now() + refreshTokenExpiryMs);
-
-    user.refreshTokens.push({
-      token: refreshToken,
-      device: deviceInfo || "unknown",
-      createdAt: new Date(),
-      expiresAt: expiresAt,
-    });
-
-    // remove oldest if > 5
-    if (user.refreshTokens.length > 5) {
-      user.refreshTokens = user.refreshTokens.slice(-5);
-    }
+    // Add the new refresh token (this handles the 5-session limit automatically)
+    user.addRefreshToken(refreshToken, deviceInfo);
 
     await user.save({ validateBeforeSave: false });
     return { accessToken, refreshToken };
@@ -246,6 +236,7 @@ const signIn = async (req: Request, res: Response) => {
       const { accessToken, refreshToken } =
         await generateAccessAndRefreshTokens(user._id as string);
 
+      // Get user without sensitive data
       const loggedInUser = await User.findById(user._id).select(
         "-refreshToken -password"
       );
@@ -297,15 +288,16 @@ const logout = async (req: Request, res: Response) => {
       });
     }
 
-    await User.findByIdAndUpdate(
-      req.user._id,
-      {
-        $unset: {
-          refreshToken: 1,
-        },
-      },
-      { new: true }
-    );
+    const incomingRefreshToken = req.cookies.refreshToken;
+
+    if (incomingRefreshToken) {
+      // Remove only the current session's refresh token
+      const user = await User.findById(req.user._id);
+      if (user) {
+        user.removeRefreshToken(incomingRefreshToken);
+        await user.save();
+      }
+    }
 
     const options = {
       httpOnly: true,
@@ -329,12 +321,46 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
+const logoutAll = async (req: Request, res: Response) => {
+  try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        message: "Unauthorized request",
+        success: false,
+      });
+    }
+
+    // Clear all refresh tokens for this user
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.clearAllRefreshTokens();
+      await user.save();
+    }
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json({
+        message: "User logged out from all devices",
+        success: true,
+      });
+  } catch (error) {
+    console.error("Logout all error:", error);
+    return res.status(500).json({
+      message: "Internal server error while logging out user from all devices",
+      success: false,
+    });
+  }
+};
+
 const refreshAccessToken = async (req: Request, res: Response) => {
   try {
-    console.log("Cookies:", req.cookies);
-    console.log("Body:", req.body);
-    console.log("Headers:", req.headers.cookie);
-
     const incomingRefreshToken =
       req.cookies.refreshToken || req.body.refreshToken;
 
@@ -345,11 +371,18 @@ const refreshAccessToken = async (req: Request, res: Response) => {
       });
     }
 
-    const decodedToken = jwt.verify(
-      incomingRefreshToken,
-      process.env.REFRESH_TOKEN_SECRET as string
-    ) as IUser;
-
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(
+        incomingRefreshToken,
+        process.env.REFRESH_TOKEN_SECRET as string
+      ) as any;
+    } catch (jwtError) {
+      return res.status(401).json({
+        message: "Invalid refresh token",
+        success: false,
+      });
+    }
     const user = await User.findById(decodedToken?._id);
 
     if (!user) {
@@ -359,39 +392,34 @@ const refreshAccessToken = async (req: Request, res: Response) => {
       });
     }
 
-    if (incomingRefreshToken !== user?.refreshToken) {
+    // Check if the token exists in user's refresh tokens array and is not expired
+    if (!user.hasValidRefreshToken(incomingRefreshToken)) {
       return res.status(401).json({
-        message: "Refresh token is expired or used",
+        message: "Refresh token is expired or invalid",
         success: false,
       });
     }
 
-    const options = {
+    // Generate only a new access token, keep the same refresh token
+    const newAccessToken = user.generateAccessToken();
+
+    const accessTokenOptions = {
       httpOnly: true,
       secure: true,
+      maxAge: 15 * 60 * 1000, // 15 mins
     };
-
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-      await generateAccessAndRefreshTokens(user._id);
-
-    await User.findByIdAndUpdate(user._id, {
-      refreshToken: newRefreshToken,
-    });
 
     return res
       .status(200)
-      .cookie("accessToken", newAccessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("accessToken", newAccessToken, accessTokenOptions)
       .json({
         message: "Access token refreshed",
-        accessToke: newAccessToken,
-        refreshToken: newRefreshToken,
         success: true,
       });
   } catch (error) {
     console.error("Refresh token:", error);
     return res.status(500).json({
-      message: "Internal server error while refreshing",
+      message: "Internal server error while refreshing token",
       success: false,
     });
   }
