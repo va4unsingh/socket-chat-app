@@ -4,6 +4,7 @@ import { loginSchema, registerSchema } from "../schema/user.schema";
 import { User } from "../models/users.model";
 import nodemailer from "nodemailer";
 import cookieParser from "cookie-parser";
+import crypto from "crypto";
 
 const generateAccessAndRefreshTokens = async (userId: string) => {
   try {
@@ -87,7 +88,7 @@ const signUp = async (req: Request, res: Response) => {
         from: process.env.MAILTRAP_SENDEREMAIL,
         to: user.email,
         subject: "Click here to verify your email",
-        text: `Please click on the following link: ${process.env.BASE_URL}/api/v1/users/verify/${verificationToken}`,
+        text: `Please click on the following link: ${process.env.BASE_URL}/api/auth/verify/${verificationToken}`,
       };
 
       await transporter.sendMail(mailOption);
@@ -114,6 +115,47 @@ const signUp = async (req: Request, res: Response) => {
     console.error("SignUp error:", error);
     return res.status(500).json({
       message: "Internal server error while registering user",
+      success: false,
+    });
+  }
+};
+
+const verifyUser = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({
+        message: "Invalid or missing token",
+      });
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      verificationToken: hashedToken,
+      verificationTokenExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired token",
+      });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      message: "Email verified successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Verification error:", error);
+    return res.status(500).json({
+      message: "Internal server error while verifying user",
       success: false,
     });
   }
@@ -205,4 +247,4 @@ const signIn = async (req: Request, res: Response) => {
   }
 };
 
-export { signUp, signIn };
+export { signUp, signIn, verifyUser };

@@ -159,7 +159,11 @@ userSchema.methods.clearRefreshToken = async function (): Promise<void> {
 
 userSchema.methods.generateVerificationToken = function (): string {
   const token = crypto.randomBytes(32).toString("hex");
-  this.verificationToken = token;
+  this.verificationToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
   this.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24hr
   return token;
 };
@@ -170,6 +174,7 @@ userSchema.methods.generatePasswordResetToken = function (): string {
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
+
   this.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10mins
   return resetToken;
 };
