@@ -43,6 +43,25 @@ const generateAccessAndRefreshTokens = async (
   }
 };
 
+const getDeviceInfo = (req: Request): string => {
+  const userAgent = req.headers["user-agent"] || "";
+
+  // Simple device detection
+  if (userAgent.includes("Mobile") || userAgent.includes("Android")) {
+    return "Mobile";
+  } else if (userAgent.includes("iPhone") || userAgent.includes("iPad")) {
+    return "iOS";
+  } else if (userAgent.includes("Chrome")) {
+    return "Chrome Browser";
+  } else if (userAgent.includes("Firefox")) {
+    return "Firefox Browser";
+  } else if (userAgent.includes("Safari")) {
+    return "Safari Browser";
+  } else {
+    return "Unknown Device";
+  }
+};
+
 const signUp = async (req: Request, res: Response) => {
   try {
     const parsedBody = registerSchema.safeParse(req.body);
