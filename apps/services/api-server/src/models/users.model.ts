@@ -136,6 +136,27 @@ userSchema.methods.isPasswordCorrect = async function (password: string) {
   return await bcrypt.compare(password, this.password);
 };
 
+// Helper function to parse time string to milliseconds
+const parseTimeToMs = (timeStr: string): number => {
+  const timeValue = parseInt(timeStr);
+  const timeUnit = timeStr.slice(-1).toLowerCase();
+
+  switch (timeUnit) {
+    case "s":
+      return timeValue * 1000;
+    case "m":
+      return timeValue * 60 * 1000;
+    case "h":
+      return timeValue * 60 * 60 * 1000;
+    case "d":
+      return timeValue * 24 * 60 * 60 * 1000;
+    case "w":
+      return timeValue * 7 * 24 * 60 * 60 * 1000;
+    default:
+      return timeValue * 60 * 1000; // default to minutes
+  }
+};
+
 const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || "15m";
 const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || "7d";
 
@@ -168,9 +189,57 @@ userSchema.methods.generateRefreshToken = function (): string {
   );
 };
 
-userSchema.methods.clearRefreshToken = async function (): Promise<void> {
-  this.refreshToken = undefined;
-  this.refreshTokenExpires = undefined;
+// Updated method for multiple refresh tokens
+userSchema.methods.addRefreshToken = function (
+  token: string,
+  device: string = "unknown"
+): void {
+  const expiryMs = parseTimeToMs(REFRESH_TOKEN_EXPIRY);
+  const expiresAt = new Date(Date.now() + expiryMs);
+
+  this.refreshTokens.push({
+    token,
+    device,
+    createdAt: new Date(),
+    expiresAt,
+  });
+
+  // Keep only last 5 sessions
+  if (this.refreshTokens.length > 5) {
+    this.refreshTokens = this.refreshTokens.slice(-5);
+  }
+};
+
+userSchema.methods.removeRefreshToken = function (tokenToRemove: string): void {
+  this.refreshTokens = this.refreshTokens.filter(
+    (tokenData: RefreshTokenData) => tokenData.token !== tokenToRemove
+  );
+};
+
+userSchema.methods.clearAllRefreshTokens = function (): void {
+  this.refreshTokens = [];
+};
+
+userSchema.methods.cleanupExpiredTokens = function (): void {
+  const now = new Date();
+  this.refreshTokens = this.refreshTokens.filter(
+    (tokenData: RefreshTokenData) => tokenData.expiresAt > now
+  );
+};
+
+userSchema.methods.hasValidRefreshToken = function (token: string): boolean {
+  const now = new Date();
+  return this.refreshTokens.some(
+    (tokenData: RefreshTokenData) =>
+      tokenData.token === token && tokenData.expiresAt > now
+  );
+};
+
+userSchema.methods.getActiveSessionsCount = function (): number {
+  const now = new Date();
+  return this.refreshTokens.filter(
+    (tokenData: RefreshTokenData) => tokenData.expiresAt > now
+  ).length;
 };
 
 userSchema.methods.generateVerificationToken = function (): string {

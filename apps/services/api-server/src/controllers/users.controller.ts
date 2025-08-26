@@ -241,11 +241,13 @@ const signIn = async (req: Request, res: Response) => {
     }
 
     try {
+      // Get device info and generate tokens
+      const deviceInfo = getDeviceInfo(req);
       const { accessToken, refreshToken } =
         await generateAccessAndRefreshTokens(user._id as string);
 
       const loggedInUser = await User.findById(user._id).select(
-        "-refreshToken"
+        "-refreshToken -password"
       );
 
       const refreshTokenOptions = {
