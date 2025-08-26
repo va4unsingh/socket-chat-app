@@ -247,4 +247,45 @@ const signIn = async (req: Request, res: Response) => {
   }
 };
 
-export { signUp, signIn, verifyUser };
+const logout = async (req: Request, res: Response) => {
+  try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        message: "Unauthorized request",
+        success: false,
+      });
+    }
+
+    await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $unset: {
+          refreshToken: 1,
+        },
+      },
+      { new: true }
+    );
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json({
+        message: "User logged out",
+        success: true,
+      });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({
+      message: "Internal server error while logging out user",
+      success: false,
+    });
+  }
+};
+
+export { signUp, signIn, verifyUser, logout };

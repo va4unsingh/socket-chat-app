@@ -16,4 +16,5 @@ router.route("/reset-password/:token").post();
 router.route("/me").get(verifyJWT);
 router.route("/logout").post(verifyJWT);
 router.route("/change-password").post(verifyJWT);
+
 export default router;
