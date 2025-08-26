@@ -3,7 +3,14 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
-export interface IUser extends Document {
+interface RefreshTokenData {
+  token: string; // the JWT
+  device: string; // iphone, chrome, etc.
+  createdAt: Date;
+  expiresAt: Date;
+}
+
+interface IUser extends Document {
   _id: string;
   firstname: string;
   lastname: string;
@@ -16,8 +23,9 @@ export interface IUser extends Document {
   verificationTokenExpires?: Date;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
-  refreshToken?: string;
-  refreshTokenExpires?: Date;
+  // All refresh token info is here
+  refreshTokens: RefreshTokenData[];
+
   createdAt: Date;
   updatedAt: Date;
 
@@ -102,8 +110,15 @@ const userSchema = new mongoose.Schema<IUser>(
     },
 
     resetPasswordExpires: Date,
-    refreshToken: String,
-    refreshTokenExpires: Date,
+
+    refreshTokens: [
+      {
+        token: { type: String, required: true },
+        device: { type: String, default: "unknown" },
+        createdAt: { type: Date, default: Date.now },
+        expiresAt: { type: Date, required: true },
+      },
+    ],
   },
   {
     timestamps: true,

@@ -3,11 +3,13 @@ import mongoose from "mongoose";
 import { loginSchema, registerSchema } from "../schema/user.schema";
 import { IUser, User } from "../models/users.model";
 import nodemailer from "nodemailer";
-import cookieParser from "cookie-parser";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
-const generateAccessAndRefreshTokens = async (userId: string) => {
+const generateAccessAndRefreshTokens = async (
+  userId: string,
+  deviceInfo?: string
+) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
@@ -16,7 +18,22 @@ const generateAccessAndRefreshTokens = async (userId: string) => {
 
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
-    user.refreshToken = refreshToken;
+
+    // Calculate expiration date based on REFRESH_TOKEN_EXPIRY (7d default)
+    const refreshTokenExpiryMs = 7 * 24 * 60 * 60 * 1000;
+    const expiresAt = new Date(Date.now() + refreshTokenExpiryMs);
+
+    user.refreshTokens.push({
+      token: refreshToken,
+      device: deviceInfo || "unknown",
+      createdAt: new Date(),
+      expiresAt: expiresAt,
+    });
+
+    // remove oldest if > 5
+    if (user.refreshTokens.length > 5) {
+      user.refreshTokens = user.refreshTokens.slice(-5);
+    }
 
     await user.save({ validateBeforeSave: false });
     return { accessToken, refreshToken };
@@ -209,7 +226,7 @@ const signIn = async (req: Request, res: Response) => {
         await generateAccessAndRefreshTokens(user._id as string);
 
       const loggedInUser = await User.findById(user._id).select(
-        "-password -refreshToken"
+        "-refreshToken"
       );
 
       const refreshTokenOptions = {
@@ -231,6 +248,8 @@ const signIn = async (req: Request, res: Response) => {
         .json({
           message: "Login successful, Your email is verified.",
           user: loggedInUser,
+          refreshToken,
+          accessToken,
         });
     } catch (tokenError) {
       console.error("Token generation error:", tokenError);
@@ -291,6 +310,10 @@ const logout = async (req: Request, res: Response) => {
 
 const refreshAccessToken = async (req: Request, res: Response) => {
   try {
+    console.log("Cookies:", req.cookies);
+    console.log("Body:", req.body);
+    console.log("Headers:", req.headers.cookie);
+
     const incomingRefreshToken =
       req.cookies.refreshToken || req.body.refreshToken;
 
@@ -327,16 +350,20 @@ const refreshAccessToken = async (req: Request, res: Response) => {
       secure: true,
     };
 
-    const { accessToken, refreshToken: newRefreshToken } =
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshTokens(user._id);
+
+    await User.findByIdAndUpdate(user._id, {
+      refreshToken: newRefreshToken,
+    });
 
     return res
       .status(200)
-      .cookie("accessToken", accessToken, options)
+      .cookie("accessToken", newAccessToken, options)
       .cookie("refreshToken", newRefreshToken, options)
       .json({
         message: "Access token refreshed",
-        accessToken,
+        accessToke: newAccessToken,
         refreshToken: newRefreshToken,
         success: true,
       });
@@ -349,4 +376,4 @@ const refreshAccessToken = async (req: Request, res: Response) => {
   }
 };
 
-export { signUp, signIn, verifyUser, logout,refreshAccessToken};
+export { signUp, signIn, verifyUser, logout, refreshAccessToken };
