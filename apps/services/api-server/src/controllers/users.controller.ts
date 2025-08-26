@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { loginSchema, registerSchema } from "../schema/user.schema";
-import { User } from "../models/users.model";
+import { IUser, User } from "../models/users.model";
 import nodemailer from "nodemailer";
 import cookieParser from "cookie-parser";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshTokens = async (userId: string) => {
   try {
@@ -288,4 +289,64 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
-export { signUp, signIn, verifyUser, logout };
+const refreshAccessToken = async (req: Request, res: Response) => {
+  try {
+    const incomingRefreshToken =
+      req.cookies.refreshToken || req.body.refreshToken;
+
+    if (!incomingRefreshToken) {
+      return res.status(401).json({
+        message: "Unauthorized Request",
+        success: false,
+      });
+    }
+
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET as string
+    ) as IUser;
+
+    const user = await User.findById(decodedToken?._id);
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid refresh token",
+        success: false,
+      });
+    }
+
+    if (incomingRefreshToken !== user?.refreshToken) {
+      return res.status(401).json({
+        message: "Refresh token is expired or used",
+        success: false,
+      });
+    }
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await generateAccessAndRefreshTokens(user._id);
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .json({
+        message: "Access token refreshed",
+        accessToken,
+        refreshToken: newRefreshToken,
+        success: true,
+      });
+  } catch (error) {
+    console.error("Refresh token:", error);
+    return res.status(500).json({
+      message: "Internal server error while refreshing",
+      success: false,
+    });
+  }
+};
+
+export { signUp, signIn, verifyUser, logout,refreshAccessToken};

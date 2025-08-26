@@ -3,7 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
-interface IUser extends Document {
+export interface IUser extends Document {
+  _id: string;
   firstname: string;
   lastname: string;
   username: string;
