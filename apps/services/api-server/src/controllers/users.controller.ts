@@ -3,6 +3,7 @@ import {
   changePasswordSchema,
   loginSchema,
   registerSchema,
+  updateAccountSchema,
 } from "../schema/user.schema";
 import { IUser, User } from "../models/users.model";
 import nodemailer from "nodemailer";
@@ -479,9 +480,9 @@ const changeCurrentPassword = async (req: Request, res: Response) => {
   }
 };
 
-export const getCurrentUser = async (req: Request, res: Response) => {
+const getCurrentUser = async (req: Request, res: Response) => {
   try {
-    if (!req.user) {
+    if (!req.user?._id) {
       return res.status(401).json({
         success: false,
         message: "Unauthorized",
@@ -502,6 +503,54 @@ export const getCurrentUser = async (req: Request, res: Response) => {
   }
 };
 
+const updateAccountDetails = async (req: Request, res: Response) => {
+  try {
+    if (!req.user?._id) {
+      return res.status(401).json({
+        message: "Unauthorized",
+        success: false,
+      });
+    }
+
+    const parsedBody = updateAccountSchema.safeParse(req.body);
+    if (!parsedBody.success) {
+      return res.status(400).json({
+        message: "Invalid request body for signUp",
+        errors: parsedBody.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const { firstname, lastname, email, username } = parsedBody.data;
+
+    const user = await User.findByIdAndUpdate(
+      req.user?._id,
+      {
+        $set: {
+          firstname,
+          lastname,
+          username,
+          email,
+        },
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      message: "Account Details upadted Successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Update user detail error:", error);
+    return res.status(500).json({
+      message: "Internal server error while updating user detail",
+      success: false,
+    });
+  }
+};
+
 export {
   signUp,
   signIn,
@@ -510,4 +559,6 @@ export {
   refreshAccessToken,
   logoutAll,
   changeCurrentPassword,
+  getCurrentUser,
+  updateAccountDetails,
 };

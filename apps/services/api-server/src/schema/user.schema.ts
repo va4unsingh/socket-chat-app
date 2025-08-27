@@ -52,6 +52,29 @@ export const forgotPasswordSchema = z.object({
   email: z.email("Please enter a valid email").toLowerCase().trim(),
 });
 
+export const updateAccountSchema = z.object({
+  firstname: z
+    .string()
+    .min(1, "First name is required")
+    .max(50, "First name cannot exceed 50 characters")
+    .trim(),
+  lastname: z
+    .string()
+    .min(1, "Last name is required")
+    .max(50, "Last name cannot exceed 50 characters")
+    .trim(),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username cannot exceed 30 characters")
+    .toLowerCase()
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers, and underscores"
+    ),
+  email: z.email("Please enter a valid email").toLowerCase().trim(),
+});
+
 export const resetPasswordSchema = z.object({
   token: z.string().min(1, "Reset token is required"),
   password: z

@@ -1,11 +1,13 @@
 import { Router } from "express";
 import {
   changeCurrentPassword,
+  getCurrentUser,
   logout,
   logoutAll,
   refreshAccessToken,
   signIn,
   signUp,
+  updateAccountDetails,
   verifyUser,
 } from "../controllers/users.controller";
 import { verifyJWT } from "../middlewares/auth.middleware";
@@ -21,9 +23,10 @@ router.route("/refresh-token").post(refreshAccessToken);
 // router.route("/reset-password/:token").post();
 
 // Auth needed
-// router.route("/me").get(verifyJWT);
+router.route("/me").get(verifyJWT, getCurrentUser);
 router.route("/logout").post(verifyJWT, logout);
 router.route("/logout-all").post(verifyJWT, logoutAll);
 router.route("/change-password").post(verifyJWT, changeCurrentPassword);
+router.route("/update-account").patch(verifyJWT, updateAccountDetails);
 
 export default router;
