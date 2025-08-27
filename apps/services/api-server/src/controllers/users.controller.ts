@@ -650,7 +650,15 @@ const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    const { password, confirmPassword, token } = parsedBody.data;
+    const { password, confirmPassword } = parsedBody.data;
+
+    const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({
+        message: "Invalid or missing token",
+      });
+    }
     if (password !== confirmPassword) {
       return res.status(400).json({
         message: "Confirm Password doesn't match",
