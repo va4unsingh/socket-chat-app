@@ -570,7 +570,7 @@ const forgotPassword = async (req: Request, res: Response) => {
     const parsedBody = forgotPasswordSchema.safeParse(req.body);
     if (!parsedBody.success) {
       return res.status(400).json({
-        message: "Invalid request body for signUp",
+        message: "Invalid request body for forgotPassword", // Fixed message
         errors: parsedBody.error.issues.map((issue) => ({
           field: issue.path.join("."),
           message: issue.message,
@@ -591,7 +591,7 @@ const forgotPassword = async (req: Request, res: Response) => {
       });
     }
 
-    const resetPasswordToken = user.generatePasswordResetToken;
+    const resetPasswordToken = user.generatePasswordResetToken();
     await user.save();
 
     try {
@@ -617,11 +617,20 @@ const forgotPassword = async (req: Request, res: Response) => {
       await transporter.sendMail(mailOptions);
     } catch (emailError) {
       console.error("Email sending failed:", emailError);
+      return res.status(500).json({
+        message: "Failed to send reset email",
+        success: false,
+      });
     }
+
+    res.status(200).json({
+      message: "Password reset link sent to your email.",
+      success: true,
+    });
   } catch (error) {
     console.error("Forget password error:", error);
     return res.status(500).json({
-      message: "Internal server error while forgetting password",
+      message: "Internal server error while processing forgot password",
       success: false,
     });
   }
@@ -637,5 +646,5 @@ export {
   changeCurrentPassword,
   getCurrentUser,
   updateAccountDetails,
-  forgotPassword
+  forgotPassword,
 };
