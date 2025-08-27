@@ -23,7 +23,7 @@ interface IUser extends Document {
   verificationTokenExpires?: Date;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
-  
+
   // All refresh token info is here
   refreshTokens: RefreshTokenData[];
 
@@ -36,7 +36,7 @@ interface IUser extends Document {
   generateRefreshToken(): string;
   generateVerificationToken(): string;
   generatePasswordResetToken(): string;
-  
+
   // New refresh token management methods
   addRefreshToken(token: string, device?: string): void;
   removeRefreshToken(tokenToRemove: string): void;
@@ -142,7 +142,26 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.isPasswordCorrect = async function (password: string) {
-  return await bcrypt.compare(password, this.password);
+  console.log("Checking password for user:", this.email);
+
+  if (!this.password) {
+    // console.log("No password set for this user");
+    return false;
+  }
+
+  if (!password) {
+    // console.log("No password provided to compare");
+    return false;
+  }
+
+  try {
+    const isMatch = await bcrypt.compare(password, this.password);
+    // console.log("Password comparison result:", isMatch);
+    return isMatch;
+  } catch (error) {
+    console.error("Error comparing passwords:", error);
+    return false;
+  }
 };
 
 // Helper function to parse time string to milliseconds

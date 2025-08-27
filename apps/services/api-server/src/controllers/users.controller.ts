@@ -264,8 +264,6 @@ const signIn = async (req: Request, res: Response) => {
         .json({
           message: "Login successful, Your email is verified.",
           user: loggedInUser,
-          refreshToken,
-          accessToken,
         });
     } catch (tokenError) {
       console.error("Token generation error:", tokenError);
@@ -424,7 +422,7 @@ const refreshAccessToken = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Refresh token:", error);
     return res.status(500).json({
-      message: "Internal server error while refreshing token",
+      message: "Internal server error while refreshing access token",
       success: false,
     });
   }
@@ -445,27 +443,40 @@ const changeCurrentPassword = async (req: Request, res: Response) => {
 
     const { currentPassword, newPassword, confirmNewPassword } =
       parsedBody.data;
+
     if (newPassword !== confirmNewPassword) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "Confirm Password doesn't match",
         success: false,
       });
     }
 
-    const user = await User.findById(req.user?._id);
-
-    const isPasswordCorrect = await user?.isPasswordCorrect(currentPassword);
-    if (!isPasswordCorrect) {
-      res.status(400).json({
-        message: "Invalid Password",
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        message: "New password must be different from current password",
         success: false,
       });
     }
 
-    if (user) {
-      user.password = newPassword;
-      await user.save({ validateBeforeSave: true });
+    const user = await User.findById(req.user?._id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
     }
+
+    const isPasswordCorrect = await user.isPasswordCorrect(currentPassword);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({
+        message: "Current password is incorrect",
+        success: false,
+      });
+    }
+
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: true });
 
     return res.status(200).json({
       message: "Password changed Successfully",
@@ -489,10 +500,12 @@ const getCurrentUser = async (req: Request, res: Response) => {
       });
     }
 
+    const { refreshTokens, ...safeUser } = req.user.toObject();
+
     return res.status(200).json({
       message: "Current user fetched successfully",
       success: true,
-      user: req.user,
+      user: safeUser,
     });
   } catch (error) {
     console.error("Error fetching current user:", error);
