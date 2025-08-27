@@ -42,6 +42,10 @@ export const changePasswordSchema = z.object({
     .string()
     .min(6, "New password must be at least 6 characters")
     .max(100, "Password cannot exceed 100 characters"),
+  confirmNewPassword: z
+    .string()
+    .min(6, "Confirm password must be at least 6 characters")
+    .max(100, "Password cannot exceed 100 characters"),
 });
 
 export const forgotPasswordSchema = z.object({

@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
-import { loginSchema, registerSchema } from "../schema/user.schema";
+import {
+  changePasswordSchema,
+  loginSchema,
+  registerSchema,
+} from "../schema/user.schema";
 import { IUser, User } from "../models/users.model";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
@@ -426,4 +429,62 @@ const refreshAccessToken = async (req: Request, res: Response) => {
   }
 };
 
-export { signUp, signIn, verifyUser, logout, refreshAccessToken, logoutAll };
+const changeCurrentPassword = async (req: Request, res: Response) => {
+  try {
+    const parsedBody = changePasswordSchema.safeParse(req.body);
+    if (!parsedBody.success) {
+      return res.status(400).json({
+        message: "Invalid request body for signUp",
+        errors: parsedBody.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const { currentPassword, newPassword, confirmNewPassword } =
+      parsedBody.data;
+    if (newPassword !== confirmNewPassword) {
+      res.status(400).json({
+        message: "Confirm Password doesn't match",
+        success: false,
+      });
+    }
+
+    const user = await User.findById(req.user?._id);
+
+    const isPasswordCorrect = await user?.isPasswordCorrect(currentPassword);
+    if (!isPasswordCorrect) {
+      res.status(400).json({
+        message: "Invalid Password",
+        success: false,
+      });
+    }
+
+    if (user) {
+      user.password = newPassword;
+      await user.save({ validateBeforeSave: true });
+    }
+
+    return res.status(200).json({
+      message: "Password changed Successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Change Password error:", error);
+    return res.status(500).json({
+      message: "Internal server error while changing Password",
+      success: false,
+    });
+  }
+};
+
+export {
+  signUp,
+  signIn,
+  verifyUser,
+  logout,
+  refreshAccessToken,
+  logoutAll,
+  changeCurrentPassword,
+};
