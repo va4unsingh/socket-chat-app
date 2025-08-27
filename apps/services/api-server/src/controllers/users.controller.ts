@@ -479,6 +479,29 @@ const changeCurrentPassword = async (req: Request, res: Response) => {
   }
 };
 
+export const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Current user fetched successfully",
+      success: true,
+      user: req.user,
+    });
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    return res.status(500).json({
+      message: "Internal server error while fetching current user ",
+      success: false,
+    });
+  }
+};
+
 export {
   signUp,
   signIn,
