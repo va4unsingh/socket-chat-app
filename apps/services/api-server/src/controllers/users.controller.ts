@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   changePasswordSchema,
+  forgotPasswordSchema,
   loginSchema,
   registerSchema,
   updateAccountSchema,
@@ -564,6 +565,68 @@ const updateAccountDetails = async (req: Request, res: Response) => {
   }
 };
 
+const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const parsedBody = forgotPasswordSchema.safeParse(req.body);
+    if (!parsedBody.success) {
+      return res.status(400).json({
+        message: "Invalid request body for signUp",
+        errors: parsedBody.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const { identifier } = parsedBody.data;
+
+    const user = await User.findOne({
+      $or: [{ username: identifier }, { email: identifier }],
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid User",
+        success: false,
+      });
+    }
+
+    const resetPasswordToken = user.generatePasswordResetToken;
+    await user.save();
+
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.MAILTRAP_HOST as string,
+        port: parseInt(process.env.MAILTRAP_PORT as string),
+        secure: false,
+        auth: {
+          user: process.env.MAILTRAP_USERNAME,
+          pass: process.env.MAILTRAP_PASSWORD,
+        },
+      });
+
+      const resetUrl = `${process.env.BASE_URL}/reset-password/${resetPasswordToken}`;
+
+      const mailOptions = {
+        from: process.env.MAILTRAP_SENDEREMAIL,
+        to: user.email,
+        subject: "Password Reset",
+        text: `Click this link to reset your password: ${resetUrl}`,
+      };
+
+      await transporter.sendMail(mailOptions);
+    } catch (emailError) {
+      console.error("Email sending failed:", emailError);
+    }
+  } catch (error) {
+    console.error("Forget password error:", error);
+    return res.status(500).json({
+      message: "Internal server error while forgetting password",
+      success: false,
+    });
+  }
+};
+
 export {
   signUp,
   signIn,
@@ -574,4 +637,5 @@ export {
   changeCurrentPassword,
   getCurrentUser,
   updateAccountDetails,
+  forgotPassword
 };

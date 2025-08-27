@@ -49,7 +49,11 @@ export const changePasswordSchema = z.object({
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.email("Please enter a valid email").toLowerCase().trim(),
+  identifier: z
+    .string()
+    .min(1, "Email or username is required")
+    .trim()
+    .toLowerCase(),
 });
 
 export const updateAccountSchema = z.object({
@@ -83,13 +87,8 @@ export const resetPasswordSchema = z.object({
     .max(100, "Password cannot exceed 100 characters"),
 });
 
-export const verifyEmailSchema = z.object({
-  token: z.string().min(1, "Verification token is required"),
-});
-
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
-export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
