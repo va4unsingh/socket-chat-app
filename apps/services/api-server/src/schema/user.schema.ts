@@ -85,6 +85,10 @@ export const resetPasswordSchema = z.object({
     .string()
     .min(6, "Password must be at least 6 characters")
     .max(100, "Password cannot exceed 100 characters"),
+  confirmPassword: z
+    .string()
+    .min(6, "Confirm password must be at least 6 characters")
+    .max(100, "Password cannot exceed 100 characters"),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

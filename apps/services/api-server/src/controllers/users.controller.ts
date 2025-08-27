@@ -4,6 +4,7 @@ import {
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
   updateAccountSchema,
 } from "../schema/user.schema";
 import { IUser, User } from "../models/users.model";
@@ -166,7 +167,7 @@ const verifyUser = async (req: Request, res: Response) => {
 
     const user = await User.findOne({
       verificationToken: hashedToken,
-      verificationTokenExpires: { $gt: new Date() },
+      verificationTokenExpires: { $gt: Date.now() },
     });
 
     if (!user) {
@@ -636,6 +637,61 @@ const forgotPassword = async (req: Request, res: Response) => {
   }
 };
 
+const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const parsedBody = resetPasswordSchema.safeParse(req.body);
+    if (!parsedBody.success) {
+      return res.status(400).json({
+        message: "Invalid request body for reset password",
+        errors: parsedBody.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const { password, confirmPassword, token } = parsedBody.data;
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        message: "Confirm Password doesn't match",
+        success: false,
+      });
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid or expired reset token",
+        success: false,
+      });
+    }
+
+    user.password = password;
+
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Password reset successful",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return res.status(500).json({
+      message: "Internal server error while resetting password",
+      success: false,
+    });
+  }
+};
+
 export {
   signUp,
   signIn,
@@ -647,4 +703,5 @@ export {
   getCurrentUser,
   updateAccountDetails,
   forgotPassword,
+  resetPassword,
 };

@@ -6,6 +6,7 @@ import {
   logout,
   logoutAll,
   refreshAccessToken,
+  resetPassword,
   signIn,
   signUp,
   updateAccountDetails,
@@ -21,7 +22,7 @@ router.route("/signin").post(signIn);
 router.route("/verify/:token").get(verifyUser);
 router.route("/refresh-token").post(refreshAccessToken);
 router.route("/forgot-password").post(forgotPassword);
-// router.route("/reset-password/:token").post();
+router.route("/reset-password/:token").post(resetPassword);
 
 // Auth needed
 router.route("/me").get(verifyJWT, getCurrentUser);
