@@ -44,6 +44,9 @@ interface IUser extends Document {
   cleanupExpiredTokens(): void;
   hasValidRefreshToken(token: string): boolean;
   getActiveSessionsCount(): number;
+
+  isActive?: boolean; // <-- add this
+  deactivatedAt?: Date;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -128,6 +131,8 @@ const userSchema = new mongoose.Schema<IUser>(
         expiresAt: { type: Date, required: true },
       },
     ],
+    isActive: { type: Boolean, default: true },
+    deactivatedAt: { type: Date },
   },
   {
     timestamps: true,
