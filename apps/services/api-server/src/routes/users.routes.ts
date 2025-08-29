@@ -1,11 +1,13 @@
 import { Router } from "express";
 import {
   changeCurrentPassword,
+  deactivateAccount,
   deleteAccount,
   forgotPassword,
   getCurrentUser,
   logout,
   logoutAll,
+  reactivateAccount,
   refreshAccessToken,
   resetPassword,
   signIn,
@@ -33,8 +35,7 @@ router.route("/logout-all").post(verifyJWT, logoutAll);
 router.route("/change-password").post(verifyJWT, changeCurrentPassword);
 router.route("/update-account").patch(verifyJWT, updateAccountDetails);
 router.route("/delete-account").delete(verifyJWT, deleteAccount);
-// router.route("/deactivate-account").patch(verifyJWT, deactivateAccount);
-// router.route("/reactivate-account").patch(verifyJWT, reactivateAccount);
-
+router.route("/deactivate-account").patch(verifyJWT, deactivateAccount);
+router.route("/reactivate-account").patch(verifyJWT, reactivateAccount);
 
 export default router;

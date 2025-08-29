@@ -47,6 +47,7 @@ interface IUser extends Document {
 
   isActive?: boolean; // <-- add this
   deactivatedAt?: Date;
+  reactivatedAt?: Date;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -131,8 +132,19 @@ const userSchema = new mongoose.Schema<IUser>(
         expiresAt: { type: Date, required: true },
       },
     ],
-    isActive: { type: Boolean, default: true },
-    deactivatedAt: { type: Date },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    deactivatedAt: {
+      type: Date,
+    },
+
+    reactivatedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

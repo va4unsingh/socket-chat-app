@@ -762,8 +762,8 @@ const deactivateAccount = async (req: Request, res: Response) => {
       });
     }
 
-    user.clearAllRefreshTokens();
     user.isActive = false;
+    user.deactivatedAt = new Date();
     user.clearAllRefreshTokens?.();
     await user.save();
 
@@ -789,6 +789,46 @@ const deactivateAccount = async (req: Request, res: Response) => {
   }
 };
 
+const reactivateAccount = async (req: Request, res: Response) => {
+  try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        message: "Unauthorized request",
+        success: false,
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (user.isActive) {
+      return res.status(400).json({
+        message: "Account already active",
+        success: false,
+      });
+    }
+    // Reactivate account
+    user.isActive = true;
+    user.reactivatedAt = new Date();
+    await user.save();
+
+    return res.status(200).json({
+      message: "Account reactivated successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to reactivate account",
+      success: true,
+    });
+  }
+};
+
 export {
   signUp,
   signIn,
@@ -802,4 +842,6 @@ export {
   forgotPassword,
   resetPassword,
   deleteAccount,
+  deactivateAccount,
+  reactivateAccount,
 };
