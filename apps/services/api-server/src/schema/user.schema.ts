@@ -90,6 +90,10 @@ export const resetPasswordSchema = z.object({
     .max(100, "Password cannot exceed 100 characters"),
 });
 
+export const resendVerificationEmailSchema = z.object({
+  email: z.email("Please enter a valid email").toLowerCase().trim(),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

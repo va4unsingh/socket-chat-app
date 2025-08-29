@@ -4,6 +4,7 @@ import {
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
+  resendVerificationEmailSchema,
   resetPasswordSchema,
   updateAccountSchema,
 } from "../schema/user.schema";
@@ -829,6 +830,74 @@ const reactivateAccount = async (req: Request, res: Response) => {
   }
 };
 
+const resendVerificationEmail = async (req: Request, res: Response) => {
+  try {
+    const parsedBody = resendVerificationEmailSchema.safeParse(req.body);
+    if (!parsedBody.success) {
+      return res.status(400).json({
+        message: "Invalid request body for signUp",
+        errors: parsedBody.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        })),
+      });
+    }
+
+    const { email } = parsedBody.data;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: true,
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        message: "Account already verified",
+        success: false,
+      });
+    }
+
+    // 🔑 generate new token (raw token for email)
+    const verificationToken = user.generateVerificationToken();
+    user.save();
+
+    // send mail
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAILTRAP_HOST as string,
+      port: parseInt(process.env.MAILTRAP_PORT as string),
+      secure: false,
+      auth: {
+        user: process.env.MAILTRAP_USERNAME as string,
+        pass: process.env.MAILTRAP_PASSWORD as string,
+      },
+    });
+
+    const mailOption = {
+      from: process.env.MAILTRAP_SENDEREMAIL,
+      to: user.email,
+      subject: "Click here to verify your email",
+      text: `Please click on the following link: ${process.env.BASE_URL}/api/auth/verify/${verificationToken}`,
+    };
+
+    await transporter.sendMail(mailOption);
+    console.log(`Verification email resent to: ${user.email}`);
+
+    return res.status(200).json({
+      message: "Verification email resent successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    return res.status(500).json({
+      message: "Internal server error while resending verification email",
+      success: false,
+    });
+  }
+};
+
 export {
   signUp,
   signIn,
@@ -844,4 +913,5 @@ export {
   deleteAccount,
   deactivateAccount,
   reactivateAccount,
+  resendVerificationEmail,
 };
