@@ -898,6 +898,16 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
   }
 };
 
+const createChat = async (req: Request, res: Response) => {};
+
+const getUserChats = async (req: Request, res: Response) => {};
+
+const getChatMessages = async (req: Request, res: Response) => {};
+
+const sendMessage = async (req: Request, res: Response) => {};
+
+const markMessagesAsRead = async (req: Request, res: Response) => {};
+
 export {
   signUp,
   signIn,
@@ -914,4 +924,9 @@ export {
   deactivateAccount,
   reactivateAccount,
   resendVerificationEmail,
+  createChat,
+  getUserChats,
+  getChatMessages,
+  sendMessage,
+  markMessagesAsRead,
 };

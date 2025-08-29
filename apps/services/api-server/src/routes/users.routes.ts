@@ -1,16 +1,21 @@
 import { Router } from "express";
 import {
   changeCurrentPassword,
+  createChat,
   deactivateAccount,
   deleteAccount,
   forgotPassword,
+  getChatMessages,
   getCurrentUser,
+  getUserChats,
   logout,
   logoutAll,
+  markMessagesAsRead,
   reactivateAccount,
   refreshAccessToken,
   resendVerificationEmail,
   resetPassword,
+  sendMessage,
   signIn,
   signUp,
   updateAccountDetails,
@@ -39,5 +44,10 @@ router.route("/update-account").patch(verifyJWT, updateAccountDetails);
 router.route("/delete-account").delete(verifyJWT, deleteAccount);
 router.route("/deactivate-account").patch(verifyJWT, deactivateAccount);
 
+router.route("/chats").get(verifyJWT, getUserChats);
+router.route("/chats").post(verifyJWT, createChat);
+router.route("/chat/:chatId/messages").get(verifyJWT, getChatMessages);
+router.route("/chats/:chatId/messages").post(verifyJWT, sendMessage);
+router.route("/chats/:chatId/read").patch(verifyJWT, markMessagesAsRead);
 
 export default router;
