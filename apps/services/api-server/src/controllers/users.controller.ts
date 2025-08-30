@@ -15,7 +15,8 @@ import jwt from "jsonwebtoken";
 import { Chat, IChat } from "../models/chat.model";
 import { group } from "console";
 import mongoose from "mongoose";
-import { Message } from "../models/message.model";
+import { IMessage, Message } from "../models/message.model";
+import { success } from "zod";
 
 const generateAccessAndRefreshTokens = async (
   userId: string,
@@ -1074,9 +1075,123 @@ const getChatMessages = async (req: Request, res: Response) => {
   }
 };
 
-const sendMessage = async (req: Request, res: Response) => {};
+const sendMessage = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    const { chatId } = req.params;
+    const { content, messageType = "text", fileUrl } = req.body;
 
-const markMessagesAsRead = async (req: Request, res: Response) => {};
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({
+        message: "Message content is required",
+        success: false,
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(chatId!)) {
+      return res.status(400).json({
+        message: "Invalid chat ID",
+        success: false,
+      });
+    }
+
+    const chat = await Chat.findOne({
+      _id: chatId,
+      participants: userId,
+    });
+
+    if (!chat) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied or chat not found",
+      });
+    }
+
+    if (messageType !== "text" && !fileUrl) {
+      return res.status(400).json({
+        message: "File URL is required for non-text messages",
+        success: false,
+      });
+    }
+
+    const messageData: Partial<IMessage> = {
+      sender: new mongoose.Types.ObjectId(userId),
+      chat: new mongoose.Types.ObjectId(chatId),
+      content: content.trim(),
+      messageType,
+    };
+
+    if (fileUrl) {
+      messageData.fileUrl = fileUrl;
+    }
+
+    const message = await Message.create(messageData);
+
+    await Chat.findByIdAndUpdate(chatId, {
+      lastMessage: message._id,
+      lastActivity: new Date(),
+    });
+
+    const populatedMessage = await Message.findById(message._id).populate(
+      "sender",
+      "firstname lastname username"
+    );
+
+    res.status(201).json({
+      message: "Message sent successfully",
+      success: true,
+      data: populatedMessage,
+    });
+  } catch (error) {
+    console.error("Send message error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error sending message",
+    });
+  }
+};
+
+const markMessagesAsRead = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    const { chatId } = req.params;
+    const { messageIds } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(chatId!)) {
+      return res.status(400).json({
+        message: "Invalid chat ID",
+        success: true,
+      });
+    }
+
+    const chat = await Chat.findOne({
+      _id: chatId,
+      participants: userId,
+    });
+
+    if (!chat) {
+      return res.status(403).json({
+        message: "Access denied or chat not found",
+        success: false,
+      });
+    }
+
+    let query: any = {
+      chat: chatId,
+      sender: { $ne: userId }, // Don't mark own messages as read
+      "readBy.user": { $ne: userId }, // Only unread messages
+    };
+
+    if (messageIds && Array.isArray(messageIds)) {
+      const validMessageIds = messageIds.filter((id) =>
+        mongoose.Types.ObjectId.isValid(id)
+      );
+      if(validMessageIds.length>0){
+        query.
+      }
+    }
+  } catch (error) {}
+};
 
 export {
   signUp,
