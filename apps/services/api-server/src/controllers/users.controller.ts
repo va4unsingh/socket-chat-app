@@ -12,6 +12,10 @@ import { IUser, User } from "../models/users.model";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import { Chat, IChat } from "../models/chat.model";
+import { group } from "console";
+import mongoose from "mongoose";
+import { Message } from "../models/message.model";
 
 const generateAccessAndRefreshTokens = async (
   userId: string,
@@ -898,11 +902,177 @@ const resendVerificationEmail = async (req: Request, res: Response) => {
   }
 };
 
-const createChat = async (req: Request, res: Response) => {};
+const createChat = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    const { participantId, type = "direct", name: groupName } = req.body;
 
-const getUserChats = async (req: Request, res: Response) => {};
+    if (!participantId) {
+      return res.status(400).json({
+        message: "Participant ID is required",
+        success: false,
+      });
+    }
 
-const getChatMessages = async (req: Request, res: Response) => {};
+    const participant = await User.findById(participantId);
+    if (!participant) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+
+    if (type === "direct") {
+      const existingChat = await Chat.findOne({
+        type: "direct",
+        participants: {
+          $all: [userId, participantId],
+          $size: 2,
+        },
+      }).populate("participants", "firstname lastname username");
+
+      if (existingChat) {
+        return res.status(200).json({
+          message: "Chat already exists",
+          sucess: true,
+          data: existingChat,
+        });
+      }
+    }
+
+    const chatData: any = {
+      type,
+      participants: [userId, participantId],
+      lastActivity: new Date(),
+    };
+    if (type === "group") {
+      if (!groupName || groupName.trim().length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Group name is required for group chats",
+        });
+      }
+      chatData.name = groupName.trim();
+      chatData.admin = [userId];
+    }
+
+    const chat = await Chat.create(chatData);
+
+    const populatedChat = await Chat.findById(chat._id)
+      .populate("participants", "firstname lastname username")
+      .populate("admin", "firstname lastname username");
+
+    res.status(201).json({
+      message: `${type === "group" ? "Group" : "Chat"} created successfully`,
+      success: true,
+      data: populatedChat,
+    });
+  } catch (error) {
+    console.error("Create chat error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating chat",
+    });
+  }
+};
+
+const getUserChats = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?._id;
+
+    const chats = await Chat.find({
+      participants: userId,
+    })
+      .populate("participants", "firstname lastname username")
+      .populate("lastMessage")
+      .populate({
+        path: "lastMessage",
+        populate: {
+          path: "sender",
+          select: "firstname lastname username",
+        },
+      })
+      .sort({ lastActivity: -1 });
+
+    res.status(200).json({
+      message: "Chats retrieved successfully",
+      succcess: true,
+      data: chats,
+      count: chats.length,
+    });
+  } catch (error) {
+    console.error("Get user chats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving chats",
+    });
+  }
+};
+
+const getChatMessages = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    const { chatId } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const skip = (page - 1) * limit;
+
+    if (!mongoose.Types.ObjectId.isValid(chatId!)) {
+      return res.status(400).json({
+        message: "Invalid chat ID",
+        success: false,
+      });
+    }
+
+    const chat = await Chat.findOne({
+      _id: chatId,
+      participants: userId,
+    });
+
+    if (!chat) {
+      return res.status(403).json({
+        message: "Access denied or chat not found",
+        success: false,
+      });
+    }
+
+    const messages = await Message.find({
+      chat: chatId,
+      isDeleted: false,
+    })
+      .populate("sender", "firstname lastname username")
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip(skip);
+
+    const totalMessages = await Message.countDocuments({
+      chat: chatId,
+      isDeleted: false,
+    });
+
+    const totalPages = Math.ceil(totalMessages / limit);
+
+    res.status(200).json({
+      message: "Messages retrieved successfully",
+      success: true,
+      data: {
+        message: messages.reverse(),
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalMessages,
+          hasMore: page < totalPages,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get chat messages error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving messages",
+    });
+  }
+};
 
 const sendMessage = async (req: Request, res: Response) => {};
 
