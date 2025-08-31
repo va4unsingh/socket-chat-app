@@ -1,53 +1,37 @@
 import { Router } from "express";
-import {
-  changeCurrentPassword,
-  createChat,
-  deactivateAccount,
-  deleteAccount,
-  forgotPassword,
-  getChatMessages,
-  getCurrentUser,
-  getUserChats,
-  logout,
-  logoutAll,
-  markMessagesAsRead,
-  reactivateAccount,
-  refreshAccessToken,
-  resendVerificationEmail,
-  resetPassword,
-  sendMessage,
-  signIn,
-  signUp,
-  updateAccountDetails,
-  verifyUser,
-} from "../controllers/users.controller";
+
 import { verifyJWT } from "../middlewares/auth.middleware";
+import {
+  blockUser,
+  getBlockedUsers,
+  getPrivacySettings,
+  getUserProfile,
+  searchUsers,
+  unblockUser,
+  updateNotificationSettings,
+  updatePrivacySettings,
+  updateUserStatus,
+  uploadAvatar,
+} from "../controllers";
 
 const router: Router = Router();
 
-// No auth needed
-router.route("/signup").post(signUp);
-router.route("/signin").post(signIn);
-router.route("/verify/:token").get(verifyUser);
-router.route("/refresh-token").post(refreshAccessToken);
-router.route("/forgot-password").post(forgotPassword);
-router.route("/reset-password/:token").post(resetPassword);
-router.route("/resend-verification").post(resendVerificationEmail);
-router.route("/reactivate-account").patch(reactivateAccount);
+// User profiles
+router.route("/profile/:userId").get(verifyJWT, getUserProfile);
+router.route("/search-users").get(verifyJWT, searchUsers);
+router.route("/upload-avatar").patch(verifyJWT, uploadAvatar);
+router.route("/update-status").patch(verifyJWT, updateUserStatus);
 
-// Auth needed
-router.route("/me").get(verifyJWT, getCurrentUser);
-router.route("/logout").post(verifyJWT, logout);
-router.route("/logout-all").post(verifyJWT, logoutAll);
-router.route("/change-password").post(verifyJWT, changeCurrentPassword);
-router.route("/update-account").patch(verifyJWT, updateAccountDetails);
-router.route("/delete-account").delete(verifyJWT, deleteAccount);
-router.route("/deactivate-account").patch(verifyJWT, deactivateAccount);
+// Privacy & blocking
+router.route("/block/:userId").post(verifyJWT, blockUser);
+router.route("/unblock/:userId").post(verifyJWT, unblockUser);
+router.route("/blocked-users").get(verifyJWT, getBlockedUsers);
 
-router.route("/chats").get(verifyJWT, getUserChats);
-router.route("/chats").post(verifyJWT, createChat);
-router.route("/chat/:chatId/messages").get(verifyJWT, getChatMessages);
-router.route("/chats/:chatId/messages").post(verifyJWT, sendMessage);
-router.route("/chats/:chatId/read").patch(verifyJWT, markMessagesAsRead);
+// Settings
+router.route("/privacy-settings").get(verifyJWT, getPrivacySettings);
+router.route("/privacy-settings").patch(verifyJWT, updatePrivacySettings);
+router
+  .route("/notification-settings")
+  .patch(verifyJWT, updateNotificationSettings);
 
 export default router;
