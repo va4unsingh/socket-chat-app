@@ -1,6 +1,6 @@
 import mongoose, { Document } from "mongoose";
 
-export interface IUserProfile extends Document {
+ interface IUserProfile extends Document {
   user: mongoose.Types.ObjectId;
   avatar?: string;
   bio: string;
@@ -63,3 +63,5 @@ export const UserProfile = mongoose.model<IUserProfile>(
   "UserProfile",
   userProfileSchema
 );
+
+export type { IUserProfile};

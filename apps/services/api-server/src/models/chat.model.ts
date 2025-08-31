@@ -1,6 +1,6 @@
 import mongoose, { Document } from "mongoose";
 
-export interface IChat extends Document {
+interface IChat extends Document {
   type: "direct" | "group";
   participants: mongoose.Types.ObjectId[];
   name?: string;
@@ -50,3 +50,5 @@ const chatSchema = new mongoose.Schema<IChat>(
 );
 
 export const Chat = mongoose.model<IChat>("Chat", chatSchema);
+
+export type { IChat };

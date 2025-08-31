@@ -5,7 +5,7 @@ interface IReadReceipt {
   readAt: Date;
 }
 
-export interface IMessage extends Document {
+interface IMessage extends Document {
   sender: mongoose.Types.ObjectId;
   chat: mongoose.Types.ObjectId;
   content: string;
@@ -73,3 +73,5 @@ const messageSchema = new mongoose.Schema<IMessage>(
 );
 
 export const Message = mongoose.model<IMessage>("Message", messageSchema);
+
+export type { IMessage, IReadReceipt };
