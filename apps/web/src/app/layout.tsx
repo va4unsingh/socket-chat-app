@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
-import { Footer } from '@/components/footer';
+import { FooterWrapper } from '@/components/footer-wrapper';
 
 export const metadata: Metadata = {
   title: 'WhisperLink',
@@ -33,7 +33,7 @@ export default function RootLayout({
       >
         <div className="flex flex-col min-h-screen">
           {children}
-          <Footer />
+          <FooterWrapper />
         </div>
         <Toaster />
       </body>
