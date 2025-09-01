@@ -1,5 +1,21 @@
 import { Router } from "express";
-import { changeCurrentPassword, deactivateAccount, deleteAccount, forgotPassword, getCurrentUser, logout, logoutAll, reactivateAccount, refreshAccessToken, resendVerificationEmail, resetPassword, signIn, signUp, updateAccountDetails, verifyUser } from "../controllers/auth.controller";
+import {
+  changeCurrentPassword,
+  deactivateAccount,
+  deleteAccount,
+  forgotPassword,
+  getCurrentUser,
+  logout,
+  logoutAll,
+  reactivateAccount,
+  refreshAccessToken,
+  resendVerificationEmail,
+  resetPassword,
+  signIn,
+  signUp,
+  updateAccountDetails,
+  verifyUser,
+} from "../controllers";
 import { verifyJWT } from "../middlewares/auth.middleware";
 const router: Router = Router();
 

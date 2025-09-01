@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -50,7 +50,7 @@ app.get("/api/v1/health", (req, res) => {
 });
 
 // 404 handler
-app.use("*", (req, res) => {
+app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     message: `Route ${req.originalUrl} not found`,
@@ -58,8 +58,9 @@ app.use("*", (req, res) => {
 });
 
 // Global error handler
-app.use((err: any, req: any, res: any, next: any) => {
-  console.error("Error:", err.stack);
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error("Error:", err.stack || err);
+
   res.status(err.status || 500).json({
     success: false,
     message: err.message || "Something went wrong!",

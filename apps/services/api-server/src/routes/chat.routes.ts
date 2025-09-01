@@ -1,6 +1,17 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware";
-import { addGroupMember, createChat, createGroup, getChatMessages, getUserChats, leaveGroup, markMessagesAsRead, removeGroupMember, sendMessage, uploadFile } from "../controllers/chat.controller";
+import {
+  addGroupMember,
+  createChat,
+  createGroup,
+  getChatMessages,
+  getUserChats,
+  leaveGroup,
+  markMessagesAsRead,
+  removeGroupMember,
+  sendMessage,
+  uploadFile,
+} from "../controllers";
 const router: Router = Router();
 
 router.route("/chats").get(verifyJWT, getUserChats);
