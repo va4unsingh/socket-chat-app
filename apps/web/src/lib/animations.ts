@@ -1,3 +1,7 @@
+'use client';
+
+import { Variants } from 'framer-motion';
+
 export const staggerContainer = {
   hidden: { opacity: 0 },
   show: {
@@ -20,7 +24,7 @@ export const hoverScale = {
   },
 };
 
-export const iconHover = {
+export const iconHover: Variants = {
     hover: {
         scale: 1.2,
         transition: { type: 'spring', stiffness: 400, damping: 10 }
