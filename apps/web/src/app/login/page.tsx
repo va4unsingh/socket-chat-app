@@ -1,8 +1,7 @@
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Logo } from '@/components/icons';
+import { Logo, GoogleIcon } from '@/components/icons';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -16,9 +15,9 @@ export default function LoginPage() {
                 <Logo className="h-8 w-8 text-primary" />
                 <span className="text-2xl font-bold">WhisperLink</span>
             </Link>
-            <h1 className="text-3xl font-bold">Login</h1>
+            <h1 className="text-3xl font-bold">Welcome Back</h1>
             <p className="text-balance text-muted-foreground">
-              Enter your email below to login to your account
+              Enter your credentials to access your account
             </p>
           </div>
           <form className="grid gap-4">
@@ -32,19 +31,21 @@ export default function LoginPage() {
               />
             </div>
             <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
-                 <Link
-                  href="/forgot-password"
-                  className="ml-auto inline-block text-sm text-muted-foreground hover:text-primary underline"
-                >
-                  Forgot your password?
-                </Link>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" required />
+              <Link
+                href="/forgot-password"
+                className="text-right text-sm text-muted-foreground hover:text-primary underline"
+              >
+                Forgot your password?
+              </Link>
             </div>
             <Button type="submit" className="w-full">
               Login
+            </Button>
+            <Button variant="outline" className="w-full">
+              <GoogleIcon className="mr-2 h-4 w-4" />
+              Login with Google
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
@@ -53,6 +54,23 @@ export default function LoginPage() {
               Sign up
             </Link>
           </div>
+          <p className="px-8 text-center text-sm text-muted-foreground">
+            By clicking continue, you agree to our{' '}
+            <Link
+              href="/terms"
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link
+              href="/privacy"
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </div>
       </div>
        <div className="hidden bg-muted lg:block">

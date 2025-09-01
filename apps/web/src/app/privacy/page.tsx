@@ -1,30 +1,29 @@
-
 import { Header } from '@/components/header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-export default function PrivacyPage() {
+export default function PrivacyPolicyPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-1 py-16 md:py-24 lg:py-32 bg-background/95">
+      <main className="flex-1 py-12 md:py-20 lg:py-28">
         <div className="container px-4 md:px-6">
-           <Card className="max-w-4xl mx-auto bg-card/95 backdrop-blur-lg border-primary/20">
-             <CardHeader className="text-center p-6 md:p-8">
-                <CardTitle className="text-3xl md:text-4xl font-bold">Privacy Policy</CardTitle>
-                <CardDescription className="text-base text-muted-foreground mt-2">Last updated: July 28, 2024</CardDescription>
-             </CardHeader>
-             <Separator />
-             <CardContent className="p-6 md:p-8 text-lg leading-relaxed text-muted-foreground">
+          <Card className="max-w-4xl mx-auto">
+            <CardHeader className="text-center p-6 md:p-8">
+                <CardTitle className="text-3xl md:text-4xl font-bold text-primary">Privacy Policy</CardTitle>
+                <CardDescription className="text-base text-muted-foreground mt-2">Last updated: September 2, 2025</CardDescription>
+            </CardHeader>
+            <Separator />
+            <CardContent className="p-6 md:p-8 text-lg leading-relaxed text-muted-foreground">
                 <p className="mb-6">
-                Welcome to WhisperLink. Your privacy is critically important to us. This Privacy Policy outlines how we collect, use, and protect your information.
+                Welcome to WhisperLink! Your privacy is critically important to us. This Privacy Policy outlines how we collect, use, and protect your information when you use our anonymous chat application.
                 </p>
 
                 <section className="mb-8">
                   <h2 className="text-2xl font-semibold text-foreground mb-4">1. Information We Collect</h2>
                   <h3 className="text-xl font-semibold text-foreground mb-3">a. Information You Provide</h3>
                   <p className="mb-4">
-                    For our free, anonymous chat service, we do not require you to create an account or provide any personally identifiable information (PII). For users who choose to sign up for an account to access premium features, we collect your email address and payment information.
+                    For our free, anonymous chat service, we do not require you to create an account or provide any personally identifiable information (PII). For users who choose to sign up for an account to access premium features, we collect your email address and payment information. All payment information is processed by a third-party payment processor; we do not store your credit card details.
                   </p>
                   <h3 className="text-xl font-semibold text-foreground mb-3">b. Chat Content</h3>
                   <p className="mb-4">
@@ -32,7 +31,7 @@ export default function PrivacyPage() {
                   </p>
                   <h3 className="text-xl font-semibold text-foreground mb-3">c. Usage Data</h3>
                   <p>
-                    We may collect non-personal information about your interaction with our service, such as session duration, features used, and crash reports. This data is aggregated and anonymized to help us improve our service.
+                    We may collect non-personal information about your interaction with our service, such as session duration, features used, and crash reports. This data is aggregated and anonymized to help us improve our service and is not linked to any individual user.
                   </p>
                 </section>
 
@@ -47,6 +46,7 @@ export default function PrivacyPage() {
                     <li>Process transactions and send you related information, including confirmations and invoices.</li>
                     <li>Respond to your comments, questions, and requests and provide customer service.</li>
                     <li>Monitor and analyze trends, usage, and activities in connection with our services.</li>
+                    <li>Personalize the service and provide advertisements, content or features that match user profiles or interests.</li>
                   </ul>
                 </section>
 
@@ -65,20 +65,27 @@ export default function PrivacyPage() {
                 </section>
                 
                 <section className="mb-8">
-                  <h2 className="text-2xl font-semibold text-foreground mb-4">5. User Rights</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-4">5. User Rights and Data Control</h2>
                   <p>
                     If you have an account with us, you have the right to access, update, or delete your personal information. You can manage your account information from your profile settings. If you wish to permanently delete your account, please contact our support team.
                   </p>
                 </section>
 
+                <section className="mb-8">
+                  <h2 className="text-2xl font-semibold text-foreground mb-4">6. Children's Privacy</h2>
+                  <p>
+                    Our service is not intended for children under the age of 13. We do not knowingly collect personally identifiable information from children under 13. If we become aware that a child under 13 has provided us with personal information, we will take steps to delete such information.
+                  </p>
+                </section>
+
                 <section>
-                  <h2 className="text-2xl font-semibold text-foreground mb-4">6. Policy Changes</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-4">7. Changes to This Privacy Policy</h2>
                   <p>
                     Although most changes are likely to be minor, WhisperLink may change its Privacy Policy from time to time. We encourage visitors to frequently check this page for any changes. Your continued use of this site after any change in this Privacy Policy will constitute your acceptance of such change.
                   </p>
                 </section>
-             </CardContent>
-           </Card>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>

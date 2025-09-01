@@ -23,7 +23,7 @@ export default function KnowledgeBasePage() {
         >
           <div className="container px-4 md:px-6 text-center">
             <MotionDiv variants={fadeInUp}> {/* Changed from motion.div */}
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-gold to-amber-300">
+              <h1 className="text-4xl font-bold sm:text-5xl md:text-6xl text-primary">
                 Knowledge Base
               </h1>
               <p className="max-w-[900px] mx-auto mt-4 text-lg text-muted-foreground md:text-xl">
@@ -49,7 +49,7 @@ export default function KnowledgeBasePage() {
 
             <MotionDiv variants={fadeInUp} className="mt-16 text-center"> {/* Changed from motion.div */}
               <p className="text-lg text-muted-foreground">
-                Can't find what you're looking for? <Link href="/support" className="text-gold hover:text-gold/80">Contact Support</Link>.
+                Can't find what you're looking for? <Link href="/support" className="text-primary hover:text-primary/80">Contact Support</Link>.
               </p>
             </MotionDiv>
           </div>

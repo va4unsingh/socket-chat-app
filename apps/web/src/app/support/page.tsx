@@ -39,7 +39,7 @@ export default function SupportPage() {
         >
           <div className="container px-4 md:px-6">
             <motion.div variants={fadeInUp} className="text-center mb-16">
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-gold to-amber-300">
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-primary">
                 Get in Touch
               </h1>
               <p className="max-w-[700px] mx-auto mt-4 text-lg text-muted-foreground md:text-xl">
@@ -86,7 +86,7 @@ export default function SupportPage() {
                         <Label htmlFor="message">Your Message</Label>
                         <Textarea id="message" placeholder="Please describe your issue or question in detail..." className="min-h-[150px] resize-none" required />
                       </div>
-                      <Button type="submit" className="w-full h-12 text-base font-semibold bg-gold text-gold-foreground hover:bg-gold/90" disabled={isSubmitting}>
+                      <Button type="submit" className="w-full h-12 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSubmitting}>
                         {isSubmitting ? 'Sending...' : 'Send Message'}
                       </Button>
                       <p className="text-sm text-muted-foreground text-center">
@@ -98,45 +98,45 @@ export default function SupportPage() {
               </motion.div>
 
               <motion.div variants={fadeInUp} className="space-y-8 relative">
-                 <div className="absolute -top-20 -right-20 w-72 h-72 bg-gold/10 rounded-full blur-3xl -z-10"></div>
-                 <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-gold/10 rounded-full blur-3xl -z-10"></div>
+                 <div className="absolute -top-20 -right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl -z-10"></div>
+                 <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl -z-10"></div>
                 <h2 className="text-2xl font-bold">Contact Information</h2>
                 <div className="space-y-6">
                     <div className="flex items-center gap-4">
-                        <Mail className="w-6 h-6 text-gold" />
+                        <Mail className="w-6 h-6 text-primary" />
                         <div>
                             <h3 className="font-semibold">Email</h3>
-                            <a href="mailto:support@example.com" className="text-muted-foreground hover:text-gold">support@example.com</a>
+                            <a href="mailto:support@example.com" className="text-muted-foreground hover:text-primary">support@example.com</a>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Phone className="w-6 h-6 text-gold" />
+                        <Phone className="w-6 h-6 text-primary" />
                         <div>
                             <h3 className="font-semibold">Phone</h3>
                             <p className="text-muted-foreground">+1 (555) 123-4567</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Clock className="w-6 h-6 text-gold" />
+                        <Clock className="w-6 h-6 text-primary" />
                         <div>
                             <h3 className="font-semibold">Business Hours</h3>
                             <p className="text-muted-foreground">Monday - Friday: 9am to 5pm</p>
                         </div>
                     </div>
                      <div className="flex items-center gap-4">
-                        <HelpCircle className="w-6 h-6 text-gold" />
+                        <HelpCircle className="w-6 h-6 text-primary" />
                         <div>
                             <h3 className="font-semibold">Self-Help</h3>
-                            <Link href="/knowledge-base" className="text-muted-foreground hover:text-gold">Visit our Knowledge Base</Link>
+                            <Link href="/knowledge-base" className="text-muted-foreground hover:text-primary">Visit our Knowledge Base</Link>
                         </div>
                     </div>
                 </div>
                 <div className="pt-6">
                     <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
                     <div className="flex space-x-4">
-                        <Link href="#" className="text-muted-foreground hover:text-gold"><Twitter /></Link>
-                        <Link href="#" className="text-muted-foreground hover:text-gold"><Facebook /></Link>
-                        <Link href="#" className="text-muted-foreground hover:text-gold"><Instagram /></Link>
+                        <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter /></Link>
+                        <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook /></Link>
+                        <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram /></Link>
                     </div>
                 </div>
               </motion.div>

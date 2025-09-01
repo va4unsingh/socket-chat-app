@@ -18,17 +18,10 @@ const allFeatures = [
   { text: 'Advanced Gender Filter', icon: Filter, proOnly: false },
   { text: 'Send Images in Chat', icon: ImageIcon, proOnly: false },
   { text: 'Basic Profile Badge', icon: Star, proOnly: false },
-  { text: '10 Custom Interest Slots', icon: Zap, proOnly: false },
-  { text: 'View Last 5 Matches', icon: History, proOnly: false },
-  { text: 'Ad-Free Experience', icon: EyeOff, proOnly: false },
   { text: 'Highest Priority Matching', icon: Crown, proOnly: true },
   { text: 'Advanced Filters (Region, etc.)', icon: Filter, proOnly: true },
   { text: 'Send Images, GIFs, & Videos', icon: Video, proOnly: true },
   { text: 'Premium Animated Profile Badge', icon: Crown, proOnly: true },
-  { text: 'Unlimited Interest Slots', icon: Zap, proOnly: true },
-  { text: 'Full Match History', icon: History, proOnly: true },
-  { text: 'Private Video Calls', icon: Video, proOnly: true },
-  { text: 'Enhanced Privacy Controls', icon: ShieldCheck, proOnly: true },
 ];
 
 const plans = {
@@ -74,10 +67,18 @@ const plans = {
 
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [expandedCards, setExpandedCards] = useState<string[]>([]);
 
   const handleToggle = (isChecked: boolean) => {
     setBillingCycle(isChecked ? 'yearly' : 'monthly');
+  };
+
+  const toggleCard = (planName: string) => {
+    setExpandedCards(prev => 
+        prev.includes(planName) 
+            ? prev.filter(name => name !== planName) 
+            : [...prev, planName]
+    );
   };
 
   const currentPlans = plans[billingCycle];
@@ -126,7 +127,7 @@ export default function PricingPage() {
                     "flex flex-col h-full rounded-2xl transition-all duration-300 relative overflow-hidden",
                     plan.isPopular
                       ? 'border-2 border-transparent bg-gradient-to-br from-background to-gold/20'
-                      : 'border bg-card/80 backdrop-blur-md'
+                      : 'border border-amber-800/30 bg-gradient-to-br from-background to-amber-700/10'
                   )}>
                     {plan.isPopular && (
                         <div className="absolute inset-0 animate-shimmer bg-cover bg-no-repeat" style={{backgroundImage: `radial-gradient(circle at 50% 50%, transparent 0%, hsl(var(--gold)) 50%, transparent 100%)`}}></div>
@@ -148,19 +149,18 @@ export default function PricingPage() {
                             <CardDescription className="pt-4 text-base text-muted-foreground h-12">{plan.description}</CardDescription>
                         </CardHeader>
                         <CardContent className="flex-1 p-8 pt-0">
-                            <motion.ul layout className="space-y-4 pt-4">
-                            <AnimatePresence initial={false}>
-                                {plan.features.slice(0, expandedCard === plan.name ? plan.features.length : 5).map((feature) => {
+                            <motion.ul className="space-y-4 pt-4">
+                            <AnimatePresence>
+                                {plan.features.slice(0, expandedCards.includes(plan.name) ? plan.features.length : 5).map((feature) => {
                                     const isFeatureAvailable = !feature.proOnly || plan.name === 'Pro';
                                     return (
                                     <motion.li
                                         key={feature.text}
-                                        layout
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                        className={cn("flex items-center gap-3 overflow-hidden", !isFeatureAvailable && "text-muted-foreground line-through")}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                        className={cn("flex items-center gap-3", !isFeatureAvailable && "text-muted-foreground line-through")}
                                     >
                                         <motion.div
                                             className={cn(
@@ -182,10 +182,10 @@ export default function PricingPage() {
                                 <Button
                                     variant="link"
                                     className="text-gold hover:text-gold/80 mt-4 p-0"
-                                    onClick={() => setExpandedCard(expandedCard === plan.name ? null : plan.name)}
+                                    onClick={() => toggleCard(plan.name)}
                                 >
-                                    {expandedCard === plan.name ? 'Show less' : 'Show all features'}
-                                    <ChevronDown className={cn("w-4 h-4 ml-2 transition-transform", expandedCard === plan.name && "rotate-180")} />
+                                    {expandedCards.includes(plan.name) ? 'Show less' : 'Show all features'}
+                                    <ChevronDown className={cn("w-4 h-4 ml-2 transition-transform", expandedCards.includes(plan.name) && "rotate-180")} />
                                 </Button>
                             )}
                         </CardContent>
