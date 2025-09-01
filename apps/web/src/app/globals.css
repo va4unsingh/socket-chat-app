@@ -121,4 +121,19 @@
   .animate-scroll {
     animation: scroll 40s linear infinite;
   }
+
+  @keyframes shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(110deg, hsl(var(--gold)) 25%, hsl(var(--primary)) 50%, hsl(var(--gold)) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 5s linear infinite;
+  }
 }
