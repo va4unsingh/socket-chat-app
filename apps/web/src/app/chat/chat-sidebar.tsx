@@ -15,7 +15,7 @@ import { SheetClose } from '@/components/ui/sheet';
 
 export function ChatSidebar({ strangerName, children }: { strangerName: string, children?: React.ReactNode }) {
     return (
-        <div className="w-full h-full flex flex-col bg-card/50">
+        <div className="w-full h-full flex flex-col bg-card/50 pb-4">
             {children}
             <div className="flex-1 flex flex-col">
                  <div className="p-4">
