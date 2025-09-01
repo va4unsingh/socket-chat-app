@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
-import { Sparkles } from 'lucide-react';
+import { Footer } from '@/components/footer';
 
 export const metadata: Metadata = {
   title: 'WhisperLink',
@@ -31,7 +31,10 @@ export default function RootLayout({
         )}
         suppressHydrationWarning
       >
-        {children}
+        <div className="flex flex-col min-h-screen">
+          {children}
+          <Footer />
+        </div>
         <Toaster />
       </body>
     </html>

@@ -83,7 +83,7 @@ export default function PricingPage() {
   const currentPlans = plans[billingCycle];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-blue-900/10 text-foreground">
+    <div className="flex flex-col min-h-screen bg-animated-gradient text-foreground">
       <Header />
       <main className="flex-1">
         <motion.section 
@@ -95,7 +95,7 @@ export default function PricingPage() {
           <div className="container px-4 md:px-6">
             <motion.div variants={fadeInUp} className="flex flex-col items-center justify-center space-y-6 text-center">
               <div className="space-y-3">
-                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-gold to-amber-300">
+                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-primary">
                   Find the Perfect Plan
                 </h1>
                 <p className="max-w-[700px] text-lg text-muted-foreground md:text-xl">
@@ -109,10 +109,10 @@ export default function PricingPage() {
                   onCheckedChange={handleToggle}
                   checked={billingCycle === 'yearly'}
                   aria-label="Toggle between monthly and yearly billing"
-                  className="data-[state=checked]:bg-gold"
+                  className="data-[state=checked]:bg-primary"
                 />
                 <Label htmlFor="billing-toggle" className={cn("font-medium text-lg", billingCycle === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
-                  Yearly <Badge variant="secondary" className="ml-2 bg-gold/20 text-gold animate-pulse">Save 15%</Badge>
+                  Yearly <Badge variant="secondary" className="ml-2 bg-primary/20 text-primary animate-pulse">Save 15%</Badge>
                 </Label>
               </div>
             </motion.div>
@@ -125,16 +125,16 @@ export default function PricingPage() {
                   <Card className={cn(
                     "flex flex-col h-full rounded-2xl transition-all duration-300 relative overflow-hidden", 
                     plan.isPopular 
-                      ? 'border-2 border-transparent bg-gradient-to-br from-background to-amber-900/20' 
+                      ? 'border-2 border-transparent bg-gradient-to-br from-background to-primary/20' 
                       : 'border bg-card/80 backdrop-blur-md'
                   )}>
                     {plan.isPopular && (
-                        <div className="absolute inset-0 animate-shimmer bg-cover bg-no-repeat" style={{backgroundImage: `radial-gradient(circle at 50% 50%, transparent 0%, hsl(var(--gold)) 50%, transparent 100%)`}}></div>
+                        <div className="absolute inset-0 animate-shimmer bg-cover bg-no-repeat" style={{backgroundImage: `radial-gradient(circle at 50% 50%, transparent 0%, hsl(var(--primary)) 50%, transparent 100%)`}}></div>
                     )}
                     <div className={cn("relative z-10 h-full flex flex-col", plan.isPopular && "bg-background/95 rounded-2xl m-0.5")}>
                         {plan.isPopular && (
                             <div className="absolute top-0 right-0 w-32 h-32">
-                                <div className="absolute transform rotate-45 bg-gold text-gold-foreground text-center font-semibold py-1 right-[-50px] top-[32px] w-[170px]">
+                                <div className="absolute transform rotate-45 bg-primary text-primary-foreground text-center font-semibold py-1 right-[-50px] top-[32px] w-[170px]">
                                     Popular
                                 </div>
                             </div>
@@ -148,23 +148,24 @@ export default function PricingPage() {
                             <CardDescription className="pt-4 text-base text-muted-foreground h-12">{plan.description}</CardDescription>
                         </CardHeader>
                         <CardContent className="flex-1 p-8 pt-0">
-                            <ul className="space-y-4 pt-4">
-                            <AnimatePresence>
-                                {plan.features.slice(0, expandedCard === plan.name ? plan.features.length : 5).map((feature, index) => {
+                            <motion.ul layout className="space-y-4 pt-4">
+                            <AnimatePresence initial={false}>
+                                {plan.features.slice(0, expandedCard === plan.name ? plan.features.length : 5).map((feature) => {
                                     const isFeatureAvailable = !feature.proOnly || plan.name === 'Pro';
                                     return (
                                     <motion.li 
-                                        key={index} 
-                                        className={cn("flex items-center gap-3", !isFeatureAvailable && "text-muted-foreground line-through")}
-                                        variants={fadeInUp}
-                                        initial="hidden"
-                                        animate="show"
-                                        exit="hidden"
+                                        key={feature.text}
+                                        layout
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                        className={cn("flex items-center gap-3 overflow-hidden", !isFeatureAvailable && "text-muted-foreground line-through")}
                                     >
                                         <motion.div 
                                             className={cn(
                                                 "flex h-6 w-6 items-center justify-center rounded-full",
-                                                isFeatureAvailable ? "bg-gold/10 text-gold" : "bg-muted/50 text-muted-foreground"
+                                                isFeatureAvailable ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground"
                                             )}
                                             variants={iconHover}
                                             whileHover="hover"
@@ -176,11 +177,11 @@ export default function PricingPage() {
                                     )
                                 })}
                             </AnimatePresence>
-                            </ul>
+                            </motion.ul>
                             {plan.features.length > 5 && (
                                 <Button 
                                     variant="link" 
-                                    className="text-gold hover:text-gold/80 mt-4 p-0"
+                                    className="text-primary hover:text-primary/80 mt-4 p-0"
                                     onClick={() => setExpandedCard(expandedCard === plan.name ? null : plan.name)}
                                 >
                                     {expandedCard === plan.name ? 'Show less' : 'Show all features'}
@@ -190,7 +191,7 @@ export default function PricingPage() {
                         </CardContent>
                         <CardFooter className="p-8 pt-0 mt-auto">
                             <Button 
-                                className={cn("w-full h-12 text-lg font-semibold", plan.isPopular && "bg-gold hover:bg-gold/90 text-gold-foreground")}
+                                className={cn("w-full h-12 text-lg font-semibold", plan.isPopular && "bg-primary hover:bg-primary/90 text-primary-foreground")}
                                 variant={plan.isPopular ? 'default' : 'outline'}
                             >
                                 {plan.cta}
@@ -202,7 +203,7 @@ export default function PricingPage() {
               ))}
             </motion.div>
             <motion.div variants={fadeInUp} className="mt-16 text-center">
-              <Link href="/faq" className="text-lg text-muted-foreground hover:text-gold transition-colors">
+              <Link href="/faq" className="text-lg text-muted-foreground hover:text-primary transition-colors">
                 Have more questions? Visit our FAQ page.
               </Link>
             </motion.div>
