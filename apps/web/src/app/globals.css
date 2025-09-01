@@ -31,6 +31,9 @@
     --border: 217 33% 17%;
     --input: 217 33% 17%;
     --ring: 212 82% 77%;
+
+    --gold: 38 92% 50%;
+    --gold-foreground: 222 84% 4.9%;
     
     --radius: 0.8rem;
   }
