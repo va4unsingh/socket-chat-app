@@ -240,51 +240,49 @@ export default function ChatClient({ }: ChatClientProps) {
                   </MatchHistorySheet>
                 </div>
             </div>
-            <div className="flex-1 overflow-y-auto">
-                <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
-                    <div className="space-y-4 max-w-4xl mx-auto w-full p-4 pb-24">
-                    {messages.map((message) => (
-                        <div
-                        key={message.id}
-                        className={cn('flex items-end gap-2', {
-                            'justify-end': message.sender === 'user',
-                            'justify-start': message.sender === 'stranger',
-                            'justify-center': message.sender === 'system',
-                        })}
-                        >
-                        {message.sender === 'stranger' && (
-                            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-secondary text-secondary-foreground">
-                            <Bot size={20} />
-                            </div>
-                        )}
-                        {message.sender === 'system' ? (
-                            <div className="text-xs text-muted-foreground italic px-4 py-1 bg-muted rounded-full flex items-center gap-2">
-                            {status === 'searching' && <Loader className="h-4 w-4 animate-spin" />}
-                            {message.text}
-                            </div>
-                        ) : (
-                            <div
-                            className={cn(
-                                'rounded-lg px-4 py-2 max-w-[75%] break-words',
-                                {
-                                'bg-primary text-primary-foreground': message.sender === 'user',
-                                'bg-muted': message.sender === 'stranger',
-                                }
-                            )}
-                            >
-                            {message.text}
-                            </div>
-                        )}
-                        {message.sender === 'user' && (
-                            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-accent text-accent-foreground">
-                            <User size={20} />
-                            </div>
-                        )}
+            <ScrollArea className="flex-1" viewportRef={scrollAreaViewportRef}>
+                <div className="space-y-4 max-w-4xl mx-auto w-full p-4">
+                {messages.map((message) => (
+                    <div
+                    key={message.id}
+                    className={cn('flex items-end gap-2', {
+                        'justify-end': message.sender === 'user',
+                        'justify-start': message.sender === 'stranger',
+                        'justify-center': message.sender === 'system',
+                    })}
+                    >
+                    {message.sender === 'stranger' && (
+                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-secondary text-secondary-foreground">
+                        <Bot size={20} />
                         </div>
-                    ))}
+                    )}
+                    {message.sender === 'system' ? (
+                        <div className="text-xs text-muted-foreground italic px-4 py-1 bg-muted rounded-full flex items-center gap-2">
+                        {status === 'searching' && <Loader className="h-4 w-4 animate-spin" />}
+                        {message.text}
+                        </div>
+                    ) : (
+                        <div
+                        className={cn(
+                            'rounded-lg px-4 py-2 max-w-[75%] break-words',
+                            {
+                            'bg-primary text-primary-foreground': message.sender === 'user',
+                            'bg-muted': message.sender === 'stranger',
+                            }
+                        )}
+                        >
+                        {message.text}
+                        </div>
+                    )}
+                    {message.sender === 'user' && (
+                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-accent text-accent-foreground">
+                        <User size={20} />
+                        </div>
+                    )}
                     </div>
-                </ScrollArea>
-            </div>
+                ))}
+                </div>
+            </ScrollArea>
             
             <div className="p-4 border-t bg-card/80 backdrop-blur-xl shrink-0">
                 <div className="flex w-full items-center space-x-2 md:space-x-4 max-w-4xl mx-auto mb-[env(safe-area-inset-bottom)]">
