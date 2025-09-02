@@ -3,6 +3,8 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { FooterWrapper } from '@/components/footer-wrapper';
+import { UserProvider } from '@/context/user-context';
+import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
   title: 'WhisperLink',
@@ -15,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full dark" suppressHydrationWarning>
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -32,11 +34,19 @@ export default function RootLayout({
         )}
         suppressHydrationWarning
       >
-        <div className="flex flex-col min-h-[100dvh]">
-          {children}
-          <FooterWrapper />
-        </div>
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
+          <UserProvider>
+            <div className="flex flex-col min-h-[100dvh]">
+              {children}
+              <FooterWrapper />
+            </div>
+            <Toaster />
+          </UserProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

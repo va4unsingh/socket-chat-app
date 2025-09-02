@@ -47,15 +47,15 @@ export default function Home() {
               </div>
               <div className="flex items-center space-x-4 pt-6">
                 <div className="flex -space-x-2 overflow-hidden">
-                  <Avatar className="inline-block h-8 w-8 rounded-full ring-2 ring-background">
+                  <Avatar className="inline-block h-8 w-8 rounded-full ring-2 ring-background transition-transform hover:scale-110">
                     <AvatarImage src="https://picsum.photos/100" data-ai-hint="person face" />
                     <AvatarFallback>U1</AvatarFallback>
                   </Avatar>
-                  <Avatar className="inline-block h-8 w-8 rounded-full ring-2 ring-background">
+                  <Avatar className="inline-block h-8 w-8 rounded-full ring-2 ring-background transition-transform hover:scale-110">
                      <AvatarImage src="https://picsum.photos/101" data-ai-hint="person face"/>
                     <AvatarFallback>U2</AvatarFallback>
                   </Avatar>
-                  <Avatar className="inline-block h-8 w-8 rounded-full ring-2 ring-background">
+                  <Avatar className="inline-block h-8 w-8 rounded-full ring-2 ring-background transition-transform hover:scale-110">
                     <AvatarImage src="https://picsum.photos/102" data-ai-hint="person face"/>
                     <AvatarFallback>U3</AvatarFallback>
                   </Avatar>
@@ -76,7 +76,7 @@ export default function Home() {
               <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]">
                   <div className="flex w-max animate-scroll">
                       {[...partners, ...partners].map((partner, index) => (
-                          <div key={index} className="flex items-center justify-center gap-2 text-lg font-semibold text-muted-foreground mx-8 flex-shrink-0">
+                          <div key={index} className="flex items-center justify-center gap-2 text-lg font-semibold text-muted-foreground mx-8 flex-shrink-0 transition-colors hover:text-primary">
                               <partner.icon className="h-6 w-6" />
                               <span>{partner.name}</span>
                           </div>
@@ -200,7 +200,7 @@ export default function Home() {
                     </p>
                 </div>
                 <div className="mx-auto grid max-w-sm gap-8 sm:max-w-none md:grid-cols-2 lg:grid-cols-3 fade-in">
-                    <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
+                    <Card className="bg-card/50 border-border/50 backdrop-blur-sm transition-colors hover:border-primary/50">
                         <CardContent className="p-6">
                             <div className="flex items-center gap-4 mb-4">
                                 <Avatar>
@@ -217,7 +217,7 @@ export default function Home() {
                             </blockquote>
                         </CardContent>
                     </Card>
-                    <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
+                    <Card className="bg-card/50 border-border/50 backdrop-blur-sm transition-colors hover:border-primary/50">
                         <CardContent className="p-6">
                             <div className="flex items-center gap-4 mb-4">
                                 <Avatar>
@@ -234,7 +234,7 @@ export default function Home() {
                             </blockquote>
                         </CardContent>
                     </Card>
-                    <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
+                    <Card className="bg-card/50 border-border/50 backdrop-blur-sm transition-colors hover:border-primary/50">
                         <CardContent className="p-6">
                             <div className="flex items-center gap-4 mb-4">
                                 <Avatar>
@@ -267,11 +267,11 @@ export default function Home() {
                 </p>
             </div>
             <Accordion type="single" collapsible className="w-full space-y-4 fade-in">
-              <AccordionItem value="item-1" className="bg-card/50 border-border/50 rounded-lg px-6 backdrop-blur-sm">
+              <AccordionItem value="item-1" className="bg-card/50 border-border/50 rounded-lg px-6 backdrop-blur-sm transition-colors hover:bg-muted/80">
                 <AccordionTrigger className="text-lg font-semibold hover:no-underline text-left">Is my chat truly anonymous?</AccordionTrigger>
                 <AccordionContent className="text-base text-muted-foreground pt-2">Yes, absolutely. We don't ask for any personal information to start a chat. Your conversations are not stored and are permanently deleted when you disconnect.</AccordionContent>
               </AccordionItem>
-              <AccordionItem value="item-2" className="bg-card/50 border-border/50 rounded-lg px-6 backdrop-blur-sm">
+              <AccordionItem value="item-2" className="bg-card/50 border-border/50 rounded-lg px-6 backdrop-blur-sm transition-colors hover:bg-muted/80">
                 <AccordionTrigger className="text-lg font-semibold hover:no-underline text-left">How are people matched?</AccordionTrigger>
                 <AccordionContent className="text-base text-muted-foreground pt-2">Our system connects you with another random user who is also looking for a conversation. If you add interests, we try to match you with someone who shares those interests for a more engaging chat.</AccordionContent>
               </AccordionItem>

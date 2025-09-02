@@ -18,6 +18,7 @@ import { MatchHistorySheet } from '@/components/match-history-sheet';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { FriendRequestDialog } from '@/components/friend-request-dialog';
 import { NotificationsDialog } from '@/components/notifications-dialog';
+import { useUser } from '@/context/user-context';
 
 
 type Message = {
@@ -33,6 +34,7 @@ interface ChatClientProps {
 
 
 export default function ChatClient({ }: ChatClientProps) {
+  const { username, avatar } = useUser();
   const [status, setStatus] = useState<ChatStatus>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -122,9 +124,9 @@ export default function ChatClient({ }: ChatClientProps) {
                 <div className='flex flex-col items-center justify-center mb-8'>
                     <Logo className="h-20 w-20 text-primary mb-4" />
                     <h2 className="text-4xl font-bold">WhisperLink</h2>
-                    <div className="flex gap-4 text-muted-foreground">
-                      <Link href="#"><Instagram /></Link>
-                      <Link href="#"><Twitter /></Link>
+                    <div className="flex gap-4 text-muted-foreground mt-2">
+                      <Link href="#" className="transition-colors hover:text-primary"><Instagram /></Link>
+                      <Link href="#" className="transition-colors hover:text-primary"><Twitter /></Link>
                     </div>
                 </div>
                 
@@ -275,9 +277,10 @@ export default function ChatClient({ }: ChatClientProps) {
                         </div>
                     )}
                     {message.sender === 'user' && (
-                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-accent text-accent-foreground">
-                        <User size={20} />
-                        </div>
+                        <Avatar className="h-8 w-8">
+                            <AvatarImage src={avatar || undefined} />
+                            <AvatarFallback>{username.substring(0, 2)}</AvatarFallback>
+                        </Avatar>
                     )}
                     </div>
                 ))}

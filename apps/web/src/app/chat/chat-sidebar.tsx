@@ -12,8 +12,11 @@ import { ProfileDialog } from '@/components/profile-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { SheetClose } from '@/components/ui/sheet';
+import { useUser } from '@/context/user-context';
 
 export function ChatSidebar({ strangerName, children }: { strangerName: string, children?: React.ReactNode }) {
+    const { username, avatar } = useUser();
+
     return (
         <div className="w-full h-full flex flex-col bg-card/50 pt-[env(safe-area-inset-top)] pb-6 pb-[env(safe-area-inset-bottom)]">
             {children}
@@ -74,11 +77,11 @@ export function ChatSidebar({ strangerName, children }: { strangerName: string, 
                     <ProfileDialog>
                         <div className='flex items-center gap-3 cursor-pointer'>
                             <Avatar className="h-10 w-10">
-                                <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="person face" />
-                                <AvatarFallback>U</AvatarFallback>
+                                <AvatarImage src={avatar || undefined} data-ai-hint="person face" />
+                                <AvatarFallback>{username.substring(0,2)}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <p className="font-semibold">Anonymous</p>
+                                <p className="font-semibold">{username}</p>
                                 <p className="text-xs text-muted-foreground">Free User</p>
                             </div>
                         </div>

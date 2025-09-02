@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from 'react';
@@ -14,17 +13,20 @@ import { Drawer, DrawerContent, DrawerTrigger, DrawerHeader, DrawerTitle, Drawer
 import { Button } from './ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Camera, Pencil, Sparkles } from 'lucide-react';
+import { Camera, Pencil, Sparkles, User, Lock, Bell, Palette, Shield, Trash2 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useIsMobile } from '@/hooks/use-mobile';
-
+import { Switch } from './ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { useUser } from '@/context/user-context';
+import { useTheme } from 'next-themes';
 
 function SettingsContent() {
-  const [username, setUsername] = useState('ancient elegy');
+  const { username, avatar, setUsername, setAvatar } = useUser();
+  const { theme, setTheme } = useTheme();
   const [isEditingUsername, setIsEditingUsername] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>('https://picsum.photos/200');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarClick = () => {
@@ -36,14 +38,14 @@ function SettingsContent() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
+        setAvatar(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
   
   const handleRemoveAvatar = () => {
-      setAvatarPreview(null);
+      setAvatar(null);
   }
 
   const handleUsernameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -55,20 +57,25 @@ function SettingsContent() {
   return (
       <Tabs defaultValue="profile" className="w-full flex flex-col sm:flex-row h-full">
         <TabsList className="flex flex-row sm:flex-col sm:h-full justify-start items-start p-2 sm:p-4 gap-1 bg-transparent sm:border-r sm:bg-muted/30 w-full sm:w-60 shrink-0">
-            <TabsTrigger value="profile" className="w-full justify-start gap-2 text-xs sm:text-sm px-2 py-1.5 sm:px-3">My Profile</TabsTrigger>
-            <TabsTrigger value="account" className="w-full justify-start gap-2 text-xs sm:text-sm px-2 py-1.5 sm:px-3">Account</TabsTrigger>
-            <TabsTrigger value="privacy" className="w-full justify-start gap-2 text-xs sm:text-sm px-2 py-1.5 sm:px-3">Privacy</TabsTrigger>
-            <TabsTrigger value="preferences" className="w-full justify-start gap-2 text-xs sm:text-sm px-2 py-1.5 sm:px-3">Preferences</TabsTrigger>
+            <TabsTrigger value="profile" className="w-full justify-start gap-2 text-xs sm:text-sm px-2 py-1.5 sm:px-3 transition-colors hover:bg-muted"><User className="h-4 w-4"/>My Profile</TabsTrigger>
+            <TabsTrigger value="account" className="w-full justify-start gap-2 text-xs sm:text-sm px-2 py-1.5 sm:px-3 transition-colors hover:bg-muted"><Lock className="h-4 w-4"/>Account</TabsTrigger>
+            <TabsTrigger value="privacy" className="w-full justify-start gap-2 text-xs sm:text-sm px-2 py-1.5 sm:px-3 transition-colors hover:bg-muted"><Shield className="h-4 w-4"/>Privacy</TabsTrigger>
+            <TabsTrigger value="preferences" className="w-full justify-start gap-2 text-xs sm:text-sm px-2 py-1.5 sm:px-3 transition-colors hover:bg-muted"><Palette className="h-4 w-4"/>Preferences</TabsTrigger>
         </TabsList>
         
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-8">
             <TabsContent value="profile" className="mt-0 space-y-8">
                  <div>
+                    <h3 className="text-lg font-medium">Profile Customization</h3>
+                    <p className="text-sm text-muted-foreground">Modify your public-facing profile details.</p>
+                 </div>
+                 <Separator />
+                 <div>
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avatar</Label>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-2">
                          <Avatar className="h-20 w-20">
-                            <AvatarImage src={avatarPreview || undefined} data-ai-hint="person face"/>
-                            <AvatarFallback>AE</AvatarFallback>
+                            <AvatarImage src={avatar || undefined} data-ai-hint="person face"/>
+                            <AvatarFallback>{username.substring(0,2)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                             <div className="flex gap-2">
@@ -82,26 +89,8 @@ function SettingsContent() {
                  </div>
                  <Separator />
                  <div>
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Banner</Label>
-                     <div className="grid grid-cols-2 gap-4 mt-2">
-                        <div className="relative border rounded-lg aspect-video flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-purple-600 to-blue-600">
-                            <p className="font-semibold text-white text-sm">Simple</p>
-                            <Button size="icon" variant="outline" className="absolute top-2 right-2 h-6 w-6 bg-black/30 backdrop-blur-sm border-white/50 text-white hover:bg-black/50 hover:text-white">
-                                <Pencil className="h-3 w-3"/>
-                            </Button>
-                        </div>
-                        <div className="relative border rounded-lg aspect-video flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500">
-                            <p className="font-semibold text-white text-sm">Gradient</p>
-                             <Button size="icon" variant="outline" className="absolute top-2 right-2 h-6 w-6 bg-black/30 backdrop-blur-sm border-white/50 text-white hover:bg-black/50 hover:text-white">
-                                <Sparkles className="h-3 w-3"/>
-                            </Button>
-                        </div>
-                    </div>
-                 </div>
-                 <Separator />
-                 <div>
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Username</Label>
-                    <div className="flex items-center justify-between mt-2 p-2 sm:p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-2 mt-2 p-2 sm:p-3 bg-muted/50 rounded-lg">
                         {isEditingUsername ? (
                             <Input 
                                 value={username} 
@@ -109,10 +98,10 @@ function SettingsContent() {
                                 onKeyDown={handleUsernameKeyDown}
                                 onBlur={() => setIsEditingUsername(false)}
                                 autoFocus
-                                className="font-mono text-sm sm:text-base"
+                                className="font-mono text-sm sm:text-base flex-1"
                             />
                         ) : (
-                            <div>
+                            <div className="flex-1">
                                 <p className="font-mono text-foreground text-sm sm:text-base">{username}</p>
                             </div>
                         )}
@@ -133,23 +122,85 @@ function SettingsContent() {
                  </div>
             </TabsContent>
 
-            <TabsContent value="account" className="mt-0">
-                <h2 className="text-xl font-bold mb-4">Account Management</h2>
-                <p className="text-muted-foreground">This is where account management settings will go.</p>
+            <TabsContent value="account" className="mt-0 space-y-8">
+                <div>
+                    <h3 className="text-lg font-medium">Account Management</h3>
+                    <p className="text-sm text-muted-foreground">Manage your account details and security.</p>
+                </div>
+                <Separator />
+                <div>
+                    <Label htmlFor="email">Email Address</Label>
+                    <div className="flex items-center gap-2 mt-2">
+                        <Input id="email" type="email" defaultValue="user@example.com" className="flex-1" />
+                        <Button>Update</Button>
+                    </div>
+                </div>
+                <Separator />
+                <div>
+                    <Label>Password</Label>
+                    <Button variant="outline" className="mt-2 w-full sm:w-auto">Change Password</Button>
+                </div>
+                <Separator />
+                <div>
+                    <Label className="text-destructive">Danger Zone</Label>
+                     <Button variant="destructive" className="mt-2 w-full sm:w-auto flex items-center gap-2"><Trash2 className="h-4 w-4"/>Delete Account</Button>
+                     <p className="text-xs text-muted-foreground mt-2">Permanently delete your account and all of your content.</p>
+                </div>
             </TabsContent>
-            <TabsContent value="privacy" className="mt-0">
-                <h2 className="text-xl font-bold mb-4">Privacy & Safety</h2>
-                <p className="text-muted-foreground">This is where privacy settings will go.</p>
+            <TabsContent value="privacy" className="mt-0 space-y-6">
+                 <div>
+                    <h3 className="text-lg font-medium">Privacy & Safety</h3>
+                    <p className="text-sm text-muted-foreground">Control who can interact with you.</p>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div>
+                        <Label>Allow direct messages</Label>
+                        <p className="text-xs text-muted-foreground">Allow users who are not on your friends list to message you.</p>
+                    </div>
+                    <Switch defaultChecked/>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div>
+                        <Label>Enable read receipts</Label>
+                        <p className="text-xs text-muted-foreground">Let others know when you have seen their messages.</p>
+                    </div>
+                    <Switch />
+                </div>
             </TabsContent>
-            <TabsContent value="preferences" className="mt-0">
-                <h2 className="text-xl font-bold mb-4">App Settings</h2>
-                <p className="text-muted-foreground">This is where user preferences will go.</p>
+            <TabsContent value="preferences" className="mt-0 space-y-8">
+                <div>
+                    <h3 className="text-lg font-medium">App Settings</h3>
+                    <p className="text-sm text-muted-foreground">Customize the look and feel of the application.</p>
+                </div>
+                <Separator />
+                <div>
+                    <Label>Theme</Label>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                        <Button variant={theme === 'light' ? 'default' : 'outline'} onClick={() => setTheme('light')}>Light</Button>
+                        <Button variant={theme === 'dark' ? 'default' : 'outline'} onClick={() => setTheme('dark')}>Dark</Button>
+                        <Button variant={theme === 'system' ? 'default' : 'outline'} onClick={() => setTheme('system')}>System</Button>
+                    </div>
+                </div>
+                <Separator />
+                <div>
+                    <Label>Language</Label>
+                     <Select defaultValue="en">
+                      <SelectTrigger className="w-full sm:w-[180px] mt-2">
+                        <SelectValue placeholder="Select a language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="es">Español</SelectItem>
+                        <SelectItem value="fr">Français</SelectItem>
+                      </SelectContent>
+                    </Select>
+                </div>
             </TabsContent>
         </div>
       </Tabs>
   );
 }
-
 
 export function SettingsDialog({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
@@ -158,7 +209,7 @@ export function SettingsDialog({ children }: { children: React.ReactNode }) {
     return (
         <Drawer>
             <DrawerTrigger asChild>{children}</DrawerTrigger>
-            <DrawerContent className="h-[70vh] pb-[env(safe-area-inset-bottom)]">
+            <DrawerContent className="h-[85vh] pb-[env(safe-area-inset-bottom)]">
                 <DrawerHeader className="text-left">
                     <DrawerTitle>Settings</DrawerTitle>
                     <DrawerDescription>Manage your account settings and preferences.</DrawerDescription>
