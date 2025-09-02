@@ -214,7 +214,7 @@ export default function ChatClient({ }: ChatClientProps) {
                            </SheetTrigger>
                          )}
                       </div>
-                      <SheetContent side="left" className="w-72 lg:w-80 p-0 top-[3.5rem] h-[calc(100vh-3.5rem)]" showClose={false}>
+                      <SheetContent side="left" className="w-72 lg:w-80 p-0 top-[3.5rem] h-[calc(100dvh-3.5rem)]" showClose={false}>
                         <SheetHeader className="sr-only">
                           <SheetTitle>Chat Sidebar</SheetTitle>
                           <SheetDescription>

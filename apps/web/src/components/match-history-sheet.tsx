@@ -26,7 +26,7 @@ export function MatchHistorySheet({ children }: { children: React.ReactNode }) {
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent side="right" className="w-72 top-[3.5rem] h-[calc(100vh-3.5rem)]" showClose={false}>
+      <SheetContent side="right" className="w-72 top-[3.5rem] h-[calc(100dvh-3.5rem)]" showClose={false}>
         <SheetHeader className="p-2 border-b">
           <SheetTitle className="flex items-center gap-2 text-base">
             <History className="h-4 w-4" />
