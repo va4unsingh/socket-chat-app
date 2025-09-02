@@ -32,7 +32,7 @@ export default function RootLayout({
         )}
         suppressHydrationWarning
       >
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-[100dvh]">
           {children}
           <FooterWrapper />
         </div>
