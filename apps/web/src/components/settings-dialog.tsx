@@ -158,7 +158,7 @@ export function SettingsDialog({ children }: { children: React.ReactNode }) {
     return (
         <Drawer>
             <DrawerTrigger asChild>{children}</DrawerTrigger>
-            <DrawerContent>
+            <DrawerContent className="h-[70vh] pb-[env(safe-area-inset-bottom)]">
                 <DrawerHeader className="text-left">
                     <DrawerTitle>Settings</DrawerTitle>
                     <DrawerDescription>Manage your account settings and preferences.</DrawerDescription>

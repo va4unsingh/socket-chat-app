@@ -17,7 +17,7 @@ export function ChatSidebar({ strangerName, children }: { strangerName: string, 
     return (
         <div className="w-full h-full flex flex-col bg-card/50 pt-[env(safe-area-inset-top)] pb-6 pb-[env(safe-area-inset-bottom)]">
             {children}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col overflow-y-auto">
                  <div className="p-4">
                     <Tabs defaultValue="chats" className="w-full flex flex-col flex-1">
                         <TabsList className="grid w-full grid-cols-2">
@@ -58,8 +58,8 @@ export function ChatSidebar({ strangerName, children }: { strangerName: string, 
                  </div>
             </div>
 
-            <div className="flex flex-col gap-2 p-4 border-t">
-                <Card className="bg-gradient-to-br from-yellow-300/10 via-amber-300/10 to-orange-300/10 border-amber-300/30 text-center overflow-hidden">
+            <div className="flex flex-col gap-2 p-4 border-t mt-auto">
+                <Card className="bg-gradient-to-br from-yellow-300/10 via-amber-300/10 to-orange-300/10 border-amber-300/30 text-center overflow-hidden mb-4">
                     <CardContent className="p-4 space-y-3">
                         <p className="text-xs text-foreground/70 font-medium">Unlock chat filters, send images, and much more!</p>
                         <PricingDialog>

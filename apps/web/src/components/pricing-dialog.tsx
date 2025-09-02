@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -16,11 +15,23 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Star, MessageCircle, ImageIcon, Zap, ShieldCheck, Crown, Video } from 'lucide-react';
+import { CheckIcon, X, Star, ShieldCheck, Video, Image as ImageIcon, MessageCircle, Crown, Zap, Filter, History, EyeOff, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from './ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { motion, AnimatePresence } from 'framer-motion';
+import { staggerContainer, fadeInUp, hoverScale, iconHover } from '@/lib/animations';
+
+const allFeatures = [
+  { text: 'Priority Matching', icon: Star, proOnly: false },
+  { text: 'Advanced Gender Filter', icon: Filter, proOnly: false },
+  { text: 'Send Images in Chat', icon: ImageIcon, proOnly: false },
+  { text: 'Basic Profile Badge', icon: Star, proOnly: false },
+  { text: 'Highest Priority Matching', icon: Crown, proOnly: true },
+  { text: 'Advanced Filters (Region, etc.)', icon: Filter, proOnly: true },
+  { text: 'Send Images, GIFs, & Videos', icon: Video, proOnly: true },
+  { text: 'Premium Animated Profile Badge', icon: Crown, proOnly: true },
+];
 
 const plans = {
   monthly: [
@@ -29,16 +40,8 @@ const plans = {
       price: '$4.99',
       priceFrequency: '/month',
       description: 'Unlock essential features to enhance your chatting experience.',
-      features: [
-        { text: 'Priority Matching', icon: Star },
-        { text: 'Advanced Gender Filter', icon: MessageCircle },
-        { text: 'Send Images in Chat', icon: ImageIcon },
-        { text: 'Basic Profile Badge', icon: Star },
-        { text: '10 Custom Interest Slots', icon: Zap },
-        { text: 'View Last 5 Matches', icon: MessageCircle },
-        { text: 'Ad-Free Experience', icon: ShieldCheck },
-      ],
-      cta: 'Subscribe to Basic',
+      features: allFeatures,
+      cta: 'Get Started with Basic',
     },
     {
       name: 'Pro',
@@ -46,18 +49,8 @@ const plans = {
       priceFrequency: '/month',
       isPopular: true,
       description: 'The ultimate toolkit for the serious chatter, with every feature unlocked.',
-      features: [
-        { text: 'Highest Priority Matching', icon: Crown },
-        { text: 'Advanced Filters (Region, etc.)', icon: MessageCircle },
-        { text: 'Send Images, GIFs, & Videos', icon: Video },
-        { text: 'Premium Animated Profile Badge', icon: Crown },
-        { text: 'Unlimited Interest Slots', icon: Zap },
-        { text: 'Full Match History', icon: MessageCircle },
-        { text: 'Ad-Free Experience', icon: ShieldCheck },
-        { text: 'Private Video Calls', icon: Video },
-        { text: 'Enhanced Privacy Controls', icon: ShieldCheck },
-      ],
-      cta: 'Subscribe to Pro',
+      features: allFeatures,
+      cta: 'Go Pro',
     },
   ],
   yearly: [
@@ -66,16 +59,8 @@ const plans = {
       price: '$49.99',
       priceFrequency: '/year',
       description: 'Unlock essential features to enhance your chatting experience.',
-      features: [
-        { text: 'Priority Matching', icon: Star },
-        { text: 'Advanced Gender Filter', icon: MessageCircle },
-        { text: 'Send Images in Chat', icon: ImageIcon },
-        { text: 'Basic Profile Badge', icon: Star },
-        { text: '10 Custom Interest Slots', icon: Zap },
-        { text: 'View Last 5 Matches', icon: MessageCircle },
-        { text: 'Ad-Free Experience', icon: ShieldCheck },
-      ],
-      cta: 'Subscribe to Basic',
+      features: allFeatures,
+      cta: 'Get Started with Basic',
     },
     {
       name: 'Pro',
@@ -83,27 +68,26 @@ const plans = {
       priceFrequency: '/year',
       isPopular: true,
       description: 'The ultimate toolkit for the serious chatter, with every feature unlocked.',
-      features: [
-        { text: 'Highest Priority Matching', icon: Crown },
-        { text: 'Advanced Filters (Region, etc.)', icon: MessageCircle },
-        { text: 'Send Images, GIFs, & Videos', icon: Video },
-        { text: 'Premium Animated Profile Badge', icon: Crown },
-        { text: 'Unlimited Interest Slots', icon: Zap },
-        { text: 'Full Match History', icon: MessageCircle },
-        { text: 'Ad-Free Experience', icon: ShieldCheck },
-        { text: 'Private Video Calls', icon: Video },
-        { text: 'Enhanced Privacy Controls', icon: ShieldCheck },
-      ],
-      cta: 'Subscribe to Pro',
+      features: allFeatures,
+      cta: 'Go Pro',
     },
   ],
 };
 
 function PricingContent() {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+    const [expandedCards, setExpandedCards] = useState<string[]>([]);
 
     const handleToggle = (isChecked: boolean) => {
         setBillingCycle(isChecked ? 'yearly' : 'monthly');
+    };
+
+    const toggleCard = (planName: string) => {
+        setExpandedCards(prev => 
+            prev.includes(planName) 
+                ? prev.filter(name => name !== planName) 
+                : [...prev, planName]
+        );
     };
     
     const currentPlans = plans[billingCycle];
@@ -117,6 +101,7 @@ function PricingContent() {
                 onCheckedChange={handleToggle}
                 checked={billingCycle === 'yearly'}
                 aria-label="Toggle between monthly and yearly billing"
+                className="data-[state=checked]:bg-gold"
             />
             <Label htmlFor="billing-toggle-dialog" className={cn("font-medium", billingCycle === 'yearly' ? 'text-foreground' : 'text-muted-foreground')}>
                 Yearly <Badge variant="secondary" className="ml-1 sm:ml-2 bg-primary/20 text-primary animate-pulse">Save 15%</Badge>
@@ -124,45 +109,91 @@ function PricingContent() {
         </div>
         
         <ScrollArea className="flex-1 p-6 pt-4">
-            <div className="mx-auto grid grid-cols-1 gap-8 md:grid-cols-2">
-                {currentPlans.map((plan) => (
-                <Card key={plan.name} className={cn("flex flex-col border", plan.isPopular ? 'border-primary shadow-lg' : 'border-border')}>
-                    <CardHeader className="p-6">
-                    {plan.isPopular && <Badge variant="default" className="w-fit mb-4 bg-primary text-primary-foreground">Most Popular</Badge>}
-                    <CardTitle className="text-2xl font-bold text-foreground">{plan.name}</CardTitle>
-                    <div className="flex items-baseline gap-2 mt-2">
-                        <span className="text-4xl font-bold tracking-tight text-foreground">{plan.price}</span>
-                        <span className="text-lg font-medium text-muted-foreground">{plan.priceFrequency}</span>
+            <motion.div
+              className="mx-auto grid max-w-sm grid-cols-1 gap-8 lg:max-w-5xl md:grid-cols-2 items-start"
+              variants={staggerContainer}
+            >
+              {currentPlans.map((plan) => (
+                <motion.div key={plan.name} variants={fadeInUp}>
+                  <Card className={cn(
+                    "flex flex-col h-full rounded-2xl transition-all duration-300 relative overflow-hidden",
+                    plan.isPopular
+                      ? 'border-2 border-transparent bg-gradient-to-br from-background to-gold/20'
+                      : 'border border-amber-800/30 bg-gradient-to-br from-background to-amber-700/10'
+                  )}>
+                    {plan.isPopular && (
+                        <div className="absolute inset-0 animate-shimmer bg-cover bg-no-repeat" style={{backgroundImage: `radial-gradient(circle at 50% 50%, transparent 0%, hsl(var(--gold)) 50%, transparent 100%)`}}></div>
+                    )}
+                    <div className={cn("relative z-10 h-full flex flex-col", plan.isPopular && "bg-background/95 rounded-2xl m-0.5")}>
+                        {plan.isPopular && (
+                            <div className="absolute top-0 right-0 w-32 h-32">
+                                <div className="absolute transform rotate-45 bg-gold text-gold-foreground text-center font-semibold py-1 right-[-50px] top-[32px] w-[170px]">
+                                    Popular
+                                </div>
+                            </div>
+                        )}
+                        <CardHeader className="p-10">
+                            <CardTitle className="text-3xl font-bold">{plan.name}</CardTitle>
+                            <div className="flex items-baseline gap-2 mt-4">
+                                <span className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-gray-400">{plan.price}</span>
+                                <span className="text-lg font-medium text-muted-foreground">{plan.priceFrequency}</span>
+                            </div>
+                            <CardDescription className="pt-4 text-base text-muted-foreground h-12">{plan.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-1 p-10 pt-0">
+                            <motion.ul className="space-y-4 pt-4">
+                            <AnimatePresence>
+                                {plan.features.slice(0, expandedCards.includes(plan.name) ? plan.features.length : 5).map((feature) => {
+                                    const isFeatureAvailable = !feature.proOnly || plan.name === 'Pro';
+                                    return (
+                                    <motion.li
+                                        key={feature.text}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                        className={cn("flex items-center gap-3", !isFeatureAvailable && "text-muted-foreground line-through")}
+                                    >
+                                        <motion.div
+                                            className={cn(
+                                                "flex h-6 w-6 items-center justify-center rounded-full",
+                                                isFeatureAvailable ? "bg-gold/10 text-gold" : "bg-muted/50 text-muted-foreground"
+                                            )}
+                                            variants={iconHover}
+                                            whileHover="hover"
+                                        >
+                                        {isFeatureAvailable ? <feature.icon className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                                        </motion.div>
+                                        <span className="text-base">{feature.text}</span>
+                                    </motion.li>
+                                    )
+                                })}
+                            </AnimatePresence>
+                            </motion.ul>
+                            {plan.features.length > 5 && (
+                                <Button
+                                    variant="link"
+                                    className="text-gold hover:text-gold/80 mt-4 p-0"
+                                    onClick={() => toggleCard(plan.name)}
+                                >
+                                    {expandedCards.includes(plan.name) ? 'Show less' : 'Show all features'}
+                                    <ChevronDown className={cn("w-4 h-4 ml-2 transition-transform", expandedCards.includes(plan.name) && "rotate-180")} />
+                                </Button>
+                            )}
+                        </CardContent>
+                        <CardFooter className="p-10 pt-0 mt-auto">
+                            <Button
+                                className={cn("w-full h-12 text-lg font-semibold", plan.isPopular && "bg-gold hover:bg-gold/90 text-gold-foreground")}
+                                variant={plan.isPopular ? 'default' : 'outline'}
+                            >
+                                {plan.cta}
+                            </Button>
+                        </CardFooter>
                     </div>
-                    <CardDescription className="pt-4 text-base text-muted-foreground">{plan.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-1 px-6 pb-6">
-                        <Accordion type="single" collapsible className="w-full">
-                          <AccordionItem value="item-1" className="border-b-0">
-                            <AccordionTrigger className="text-base font-semibold hover:no-underline text-foreground">
-                              What's Included
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <ul className="space-y-4 pt-4">
-                                {plan.features.map((feature, index) => (
-                                  <li key={index} className="flex items-center gap-3">
-                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                      <feature.icon className="h-4 w-4" />
-                                    </div>
-                                    <span className="text-base text-muted-foreground">{feature.text}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </AccordionContent>
-                          </AccordionItem>
-                        </Accordion>
-                    </CardContent>
-                    <CardFooter className="p-6 pt-0 mt-auto">
-                      <Button className="w-full h-11 text-base" variant={plan.isPopular ? 'default' : 'outline'}>{plan.cta}</Button>
-                    </CardFooter>
-                </Card>
-                ))}
-            </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
         </ScrollArea>
         </>
     );
@@ -175,7 +206,7 @@ export function PricingDialog({ children }: { children: React.ReactNode }) {
         return (
             <Drawer>
                 <DrawerTrigger asChild>{children}</DrawerTrigger>
-                <DrawerContent className="h-[90vh]">
+                <DrawerContent className="h-[70vh] pb-[env(safe-area-inset-bottom)]">
                     <DrawerHeader className="text-center">
                         <DrawerTitle className="text-3xl font-bold tracking-tighter">Upgrade Your Experience</DrawerTitle>
                         <DrawerDescription>Choose the plan that's right for you.</DrawerDescription>

@@ -26,41 +26,41 @@ export function MatchHistorySheet({ children }: { children: React.ReactNode }) {
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent side="right" className="w-[300px] p-0" showClose={false}>
-        <SheetHeader className="p-4 border-b">
-          <SheetTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" />
+      <SheetContent side="right" className="w-72 top-[3.5rem] h-[calc(100vh-3.5rem)]" showClose={false}>
+        <SheetHeader className="p-2 border-b">
+          <SheetTitle className="flex items-center gap-2 text-base">
+            <History className="h-4 w-4" />
             Match History
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="text-sm">
             Your recent matches. Pro users can see full history.
           </SheetDescription>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100%-6.5rem)]">
+        <ScrollArea className="h-[calc(100%-4.5rem)]">
 
         {pastMatches.length > 0 ? (
             <div className="flex flex-col">
                 {pastMatches.map((match, index) => (
-                    <div key={index} className="flex items-center gap-4 p-4 hover:bg-muted/50 cursor-pointer">
-                        <Avatar className="h-12 w-12">
+                    <div key={index} className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer">
+                        <Avatar className="h-10 w-10">
                             <AvatarImage src={match.avatar} />
                             <AvatarFallback>{match.name.substring(0,2)}</AvatarFallback>
                         </Avatar>
-                        <div className="flex-1">
-                            <p className="font-semibold">{match.name}</p>
-                            <p className="text-sm text-muted-foreground">{match.commonInterests} interests in common</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm truncate">{match.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{match.commonInterests} interests in common</p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right shrink-0">
                            <p className="text-xs text-muted-foreground">{match.time}</p>
-                           <Badge variant="outline" className="mt-1">Chat</Badge>
+                           <Badge variant="outline" className="mt-1 text-xs">Chat</Badge>
                         </div>
                     </div>
                 ))}
             </div>
         ) : (
              <div className="flex flex-col items-center justify-center p-8 text-muted-foreground text-center h-full">
-                <MessageSquareOff className="h-12 w-12 mb-4"/>
-                <span className="font-semibold text-lg">No Match History</span>
+                <MessageSquareOff className="h-10 w-10 mb-4"/>
+                <span className="font-semibold text-base">No Match History</span>
                 <p className="text-sm">Your recent conversations will appear here.</p>
             </div>
         )}
