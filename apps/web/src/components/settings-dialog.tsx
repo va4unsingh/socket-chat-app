@@ -24,7 +24,7 @@ import { useUser } from '@/context/user-context';
 import { useTheme } from 'next-themes';
 
 function SettingsContent() {
-  const { username, avatar, setUsername, setAvatar } = useUser();
+  const { user, login } = useUser();
   const { theme, setTheme } = useTheme();
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -38,20 +38,28 @@ function SettingsContent() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatar(reader.result as string);
+        if (user) {
+          login({ ...user, avatar: reader.result as string });
+        }
       };
       reader.readAsDataURL(file);
     }
   };
   
   const handleRemoveAvatar = () => {
-      setAvatar(null);
+    if (user) {
+      login({ ...user, avatar: null });
+    }
   }
 
   const handleUsernameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
         setIsEditingUsername(false);
     }
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
@@ -74,8 +82,8 @@ function SettingsContent() {
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avatar</Label>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-2">
                          <Avatar className="h-20 w-20">
-                            <AvatarImage src={avatar || undefined} data-ai-hint="person face"/>
-                            <AvatarFallback>{username.substring(0,2)}</AvatarFallback>
+                            <AvatarImage src={user.avatar || undefined} data-ai-hint="person face"/>
+                            <AvatarFallback>{user.email.substring(0,2)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                             <div className="flex gap-2">
@@ -93,8 +101,8 @@ function SettingsContent() {
                     <div className="flex items-center gap-2 mt-2 p-2 sm:p-3 bg-muted/50 rounded-lg">
                         {isEditingUsername ? (
                             <Input 
-                                value={username} 
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={user.email}
+                                onChange={(e) => login({ ...user, email: e.target.value })}
                                 onKeyDown={handleUsernameKeyDown}
                                 onBlur={() => setIsEditingUsername(false)}
                                 autoFocus
@@ -102,7 +110,7 @@ function SettingsContent() {
                             />
                         ) : (
                             <div className="flex-1">
-                                <p className="font-mono text-foreground text-sm sm:text-base">{username}</p>
+                                <p className="font-mono text-foreground text-sm sm:text-base">{user.email}</p>
                             </div>
                         )}
                         <Button variant="outline" size="sm" onClick={() => setIsEditingUsername(!isEditingUsername)}>
@@ -131,7 +139,7 @@ function SettingsContent() {
                 <div>
                     <Label htmlFor="email">Email Address</Label>
                     <div className="flex items-center gap-2 mt-2">
-                        <Input id="email" type="email" defaultValue="user@example.com" className="flex-1" />
+                        <Input id="email" type="email" defaultValue={user.email} className="flex-1" />
                         <Button>Update</Button>
                     </div>
                 </div>
@@ -202,13 +210,13 @@ function SettingsContent() {
   );
 }
 
-export function SettingsDialog({ children }: { children: React.ReactNode }) {
+export function SettingsDialog({ children, open, onOpenChange }: { children?: React.ReactNode, open?: boolean, onOpenChange?: (open: boolean) => void }) {
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
-        <Drawer>
-            <DrawerTrigger asChild>{children}</DrawerTrigger>
+        <Drawer open={open} onOpenChange={onOpenChange}>
+            {children && <DrawerTrigger asChild>{children}</DrawerTrigger>}
             <DrawerContent className="h-[85vh] pb-[env(safe-area-inset-bottom)]">
                 <DrawerHeader className="text-left">
                     <DrawerTitle>Settings</DrawerTitle>
@@ -223,8 +231,8 @@ export function SettingsDialog({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="max-w-4xl w-full h-auto max-h-[85vh] sm:h-[80vh] flex flex-col p-0">
         <DialogHeader className="p-4 sm:p-6 pb-0 sm:pb-2">
           <DialogTitle className="text-xl font-bold">Settings</DialogTitle>

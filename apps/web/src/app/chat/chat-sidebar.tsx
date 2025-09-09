@@ -8,14 +8,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Crown, Settings, MessageSquare, Users, Mailbox, UserPlus, X } from 'lucide-react';
 import { PricingDialog } from '@/components/pricing-dialog';
 import { SettingsDialog } from '@/components/settings-dialog';
-import { ProfileDialog } from '@/components/profile-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { SheetClose } from '@/components/ui/sheet';
 import { useUser } from '@/context/user-context';
 
 export function ChatSidebar({ strangerName, children }: { strangerName: string, children?: React.ReactNode }) {
-    const { username, avatar } = useUser();
+    const { user } = useUser();
+
+    if (!user) {
+        return null;
+    }
 
     return (
         <div className="w-full h-full flex flex-col bg-card/50 pt-[env(safe-area-inset-top)] pb-6 pb-[env(safe-area-inset-bottom)]">
@@ -74,18 +77,16 @@ export function ChatSidebar({ strangerName, children }: { strangerName: string, 
                     </CardContent>
                 </Card>
                 <div className="flex items-center justify-between gap-3 p-3 bg-transparent border-0 shadow-none rounded-lg">
-                    <ProfileDialog>
-                        <div className='flex items-center gap-3 cursor-pointer'>
-                            <Avatar className="h-10 w-10">
-                                <AvatarImage src={avatar || undefined} data-ai-hint="person face" />
-                                <AvatarFallback>{username.substring(0,2)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold">{username}</p>
-                                <p className="text-xs text-muted-foreground">Free User</p>
-                            </div>
+                    <div className='flex items-center gap-3 cursor-pointer'>
+                        <Avatar className="h-10 w-10">
+                            <AvatarImage src={user.avatar || undefined} data-ai-hint="person face" />
+                            <AvatarFallback>{user.email.substring(0,2)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <p className="font-semibold">{user.email}</p>
+                            <p className="text-xs text-muted-foreground">Free User</p>
                         </div>
-                    </ProfileDialog>
+                    </div>
                     <SettingsDialog>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                             <Settings className="h-4 w-4" />

@@ -1,3 +1,5 @@
+"use client";
+
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +10,26 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Mail, FileText, Camera, Bell, CreditCard } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { useUser } from '@/context/user-context';
 
 export default function ProfilePage() {
+  const { user } = useUser();
+
+  if (!user) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <Header />
+        <main className="flex-1 py-12 md:py-20 lg:py-28">
+          <div className="container px-4 md:px-6">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold">Please log in to view your profile.</h1>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -21,15 +41,15 @@ export default function ProfilePage() {
                 <CardContent className="p-6 text-center">
                   <div className="relative mx-auto w-32 h-32 mb-4">
                     <Avatar className="h-32 w-32 border-4 border-primary/30">
-                      <AvatarImage src="https://picsum.photos/200/200" data-ai-hint="person face" />
-                      <AvatarFallback>U</AvatarFallback>
+                      <AvatarImage src={user.avatar || 'https://picsum.photos/200/200'} data-ai-hint="person face" />
+                      <AvatarFallback>{user.email.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <Button variant="outline" size="icon" className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-card/80 backdrop-blur-sm">
                       <Camera className="h-4 w-4" />
                       <span className="sr-only">Change photo</span>
                     </Button>
                   </div>
-                  <h2 className="text-2xl font-bold">AnonymousUser</h2>
+                  <h2 className="text-2xl font-bold">{user.email}</h2>
                   <p className="text-muted-foreground">Joined July 2024</p>
                 </CardContent>
               </Card>
@@ -47,7 +67,7 @@ export default function ProfilePage() {
                           <User className="h-4 w-4" />
                           Username
                       </Label>
-                      <Input id="username" defaultValue="AnonymousUser" className="h-11 text-base"/>
+                      <Input id="username" defaultValue={user.email} className="h-11 text-base"/>
                     </div>
 
                     <div className="space-y-2">
@@ -55,7 +75,7 @@ export default function ProfilePage() {
                           <Mail className="h-4 w-4" />
                           Email
                       </Label>
-                      <Input id="email" type="email" defaultValue="user@example.com" disabled className="h-11 text-base cursor-not-allowed"/>
+                      <Input id="email" type="email" defaultValue={user.email} disabled className="h-11 text-base cursor-not-allowed"/>
                     </div>
                     
                     <div className="space-y-2">

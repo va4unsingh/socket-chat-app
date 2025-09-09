@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -10,14 +9,15 @@ import { User, LogOut, Settings, Menu } from 'lucide-react';
 import { SettingsDialog } from './settings-dialog';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
-import { ProfileDialog } from './profile-dialog';
-
+import { useUser } from '@/context/user-context';
 
 export function Header() {
-  const [isSignedIn, setIsSignedIn] = useState(true); // Placeholder for auth state
+  const { user, logout } = useUser();
+  const isSignedIn = user !== null;
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleSignOut = () => {
-    setIsSignedIn(false);
+    logout();
   }
 
   const navLinks = [
@@ -48,30 +48,26 @@ export function Header() {
         </nav>
         <div className="ml-auto flex items-center gap-2">
           {isSignedIn ? (
+            <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src="https://picsum.photos/100/100" data-ai-hint="person face" />
-                    <AvatarFallback>U</AvatarFallback>
+                    <AvatarImage src={user.avatar || 'https://picsum.photos/100/100'} data-ai-hint="person face" />
+                    <AvatarFallback>{user.email.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Anonymous</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      m@example.com
-                    </p>
+                    <p className="text-sm font-medium leading-none">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <SettingsDialog>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                  <DropdownMenuItem onSelect={() => setIsSettingsOpen(true)} className="cursor-pointer">
                       <User className="mr-2 h-4 w-4" />Profile
                   </DropdownMenuItem>
-                </SettingsDialog>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
@@ -79,6 +75,8 @@ export function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+            </>
           ) : (
             <div className="hidden md:flex items-center gap-2">
               <Button variant="outline" asChild>

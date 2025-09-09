@@ -1,23 +1,42 @@
-
 "use client";
 
-import { createContext, useState, useContext, ReactNode } from 'react';
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+
+interface User {
+  email: string;
+  avatar?: string | null;
+}
 
 interface UserContextType {
-  username: string;
-  avatar: string | null;
-  setUsername: (username: string) => void;
-  setAvatar: (avatar: string | null) => void;
+  user: User | null;
+  login: (userData: User) => void;
+  logout: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [username, setUsername] = useState('ancient elegy');
-  const [avatar, setAvatar] = useState<string | null>('https://picsum.photos/200');
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const login = (userData: User) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
 
   return (
-    <UserContext.Provider value={{ username, avatar, setUsername, setAvatar }}>
+    <UserContext.Provider value={{ user, login, logout }}>
       {children}
     </UserContext.Provider>
   );

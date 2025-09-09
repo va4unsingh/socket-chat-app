@@ -9,9 +9,11 @@ import { Logo, GoogleIcon } from "@/components/icons";
 import Link from "next/link";
 import Image from "next/image";
 import axios from "axios";
+import { useUser } from "@/context/user-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useUser();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,6 +32,7 @@ export default function LoginPage() {
 
       // Optionally save token/session if returned
       localStorage.setItem("token", response.data.token);
+      login({ email: response.data.user?.email || identifier });
 
       router.push("/"); // redirect after successful login
     } catch (err: any) {
