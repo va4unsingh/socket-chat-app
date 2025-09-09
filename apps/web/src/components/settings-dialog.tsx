@@ -20,13 +20,18 @@ import { Label } from './ui/label';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Switch } from './ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { useUser } from '@/context/user-context';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/lib/redux/store';
+import { updateUsername, updateAvatar } from '@/lib/redux/slices/userSlice';
 import { useTheme } from 'next-themes';
 
 function SettingsContent() {
-  const { user, login } = useUser();
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user.user);
   const { theme, setTheme } = useTheme();
   const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [username, setUsername] = useState(user?.username || '');
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarClick = () => {
@@ -39,7 +44,7 @@ function SettingsContent() {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (user) {
-          login({ ...user, avatar: reader.result as string });
+          dispatch(updateAvatar(reader.result as string));
         }
       };
       reader.readAsDataURL(file);
@@ -48,13 +53,16 @@ function SettingsContent() {
   
   const handleRemoveAvatar = () => {
     if (user) {
-      login({ ...user, avatar: null });
+      dispatch(updateAvatar(null));
     }
   }
 
   const handleUsernameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
         setIsEditingUsername(false);
+        if (user && user.username !== username) {
+            dispatch(updateUsername(username));
+        }
     }
   }
 
@@ -82,8 +90,8 @@ function SettingsContent() {
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avatar</Label>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-2">
                          <Avatar className="h-20 w-20">
-                            <AvatarImage src={user.avatar || undefined} data-ai-hint="person face"/>
-                            <AvatarFallback>{user.email.substring(0,2)}</AvatarFallback>
+                            <AvatarImage src={user.avatar || undefined} data-ai-hint="person face" className="object-cover"/>
+                            <AvatarFallback>{user.username.substring(0,2)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                             <div className="flex gap-2">
@@ -101,16 +109,22 @@ function SettingsContent() {
                     <div className="flex items-center gap-2 mt-2 p-2 sm:p-3 bg-muted/50 rounded-lg">
                         {isEditingUsername ? (
                             <Input 
-                                value={user.email}
-                                onChange={(e) => login({ ...user, email: e.target.value })}
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 onKeyDown={handleUsernameKeyDown}
-                                onBlur={() => setIsEditingUsername(false)}
+                                onBlur={() => {
+                                    setIsEditingUsername(false);
+                                    if (user && user.username !== username) {
+                                        dispatch(updateUsername(username));
+                                    }
+                                }}
                                 autoFocus
                                 className="font-mono text-sm sm:text-base flex-1"
+                                maxLength={20}
                             />
                         ) : (
                             <div className="flex-1">
-                                <p className="font-mono text-foreground text-sm sm:text-base">{user.email}</p>
+                                <p className="font-mono text-foreground text-sm sm:text-base">{user.username}</p>
                             </div>
                         )}
                         <Button variant="outline" size="sm" onClick={() => setIsEditingUsername(!isEditingUsername)}>
@@ -139,8 +153,8 @@ function SettingsContent() {
                 <div>
                     <Label htmlFor="email">Email Address</Label>
                     <div className="flex items-center gap-2 mt-2">
-                        <Input id="email" type="email" defaultValue={user.email} className="flex-1" />
-                        <Button>Update</Button>
+                        <Input id="email" type="email" defaultValue={user.email} className="flex-1" disabled />
+                        <Button disabled>Update</Button>
                     </div>
                 </div>
                 <Separator />

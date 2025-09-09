@@ -3,7 +3,8 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { FooterWrapper } from '@/components/footer-wrapper';
-import { UserProvider } from '@/context/user-context';
+import { StoreProvider } from '@/lib/redux/StoreProvider';
+import { ReduxInitializer } from '@/lib/redux/ReduxInitializer';
 import { ThemeProvider } from '@/components/theme-provider';
 import { CommandPalette } from '@/components/command-palette';
 
@@ -40,13 +41,15 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
         >
-          <UserProvider>
-            <div className="flex flex-col min-h-[100dvh]">
-              {children}
-              <FooterWrapper />
-            </div>
-            <Toaster />
-          </UserProvider>
+          <StoreProvider>
+            <ReduxInitializer>
+              <div className="flex flex-col min-h-[100dvh]">
+                {children}
+                <FooterWrapper />
+              </div>
+              <Toaster />
+            </ReduxInitializer>
+          </StoreProvider>
           <CommandPalette />
         </ThemeProvider>
       </body>

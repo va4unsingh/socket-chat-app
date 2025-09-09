@@ -17,7 +17,8 @@ import { MatchHistorySheet } from '@/components/match-history-sheet';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { FriendRequestDialog } from '@/components/friend-request-dialog';
 import { NotificationsDialog } from '@/components/notifications-dialog';
-import { useUser } from '@/context/user-context';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/lib/redux/store';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Image from 'next/image';
 
@@ -42,7 +43,9 @@ interface ChatClientProps {
 const EMOJI_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
 
 export default function ChatClient({ }: ChatClientProps) {
-  const { username, avatar } = useUser();
+  const user = useSelector((state: RootState) => state.user.user);
+  const username = user?.username || 'User';
+  const avatar = user?.avatar;
   const [status, setStatus] = useState<ChatStatus>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -423,7 +426,7 @@ export default function ChatClient({ }: ChatClientProps) {
                                         {message.status === 'sent' && <Check size={16} className="text-muted-foreground" />}
                                         </div>
                                         <Avatar className="h-8 w-8">
-                                            <AvatarImage src={avatar || undefined} />
+                                            <AvatarImage src={avatar || undefined} className="object-cover" />
                                             <AvatarFallback>{username.substring(0, 2)}</AvatarFallback>
                                         </Avatar>
                                     </div>

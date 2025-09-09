@@ -7,17 +7,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, LogOut, Settings, Menu } from 'lucide-react';
 import { SettingsDialog } from './settings-dialog';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
-import { useUser } from '@/context/user-context';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/lib/redux/store';
+import { logout, initializeUser } from '@/lib/redux/slices/userSlice';
 
 export function Header() {
-  const { user, logout } = useUser();
-  const isSignedIn = user !== null;
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user.user);
+  const status = useSelector((state: RootState) => state.user.status);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  useEffect(() => {
+    dispatch(initializeUser());
+  }, [dispatch]);
+
   const handleSignOut = () => {
-    logout();
+    dispatch(logout());
   }
 
   const navLinks = [
@@ -47,21 +54,27 @@ export function Header() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          {isSignedIn ? (
+          {status === 'loading' && (
+            <div className="hidden md:flex items-center gap-2">
+              <Button variant="outline" disabled>Sign In</Button>
+              <Button disabled>Sign Up</Button>
+            </div>
+          )}
+          {status !== 'loading' && user ? (
             <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.avatar || 'https://picsum.photos/100/100'} data-ai-hint="person face" />
-                    <AvatarFallback>{user.email.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarImage src={user.avatar || 'https://picsum.photos/100/100'} data-ai-hint="person face" className="object-cover" />
+                    <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.email}</p>
+                    <p className="text-sm font-medium leading-none">{user.username}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -77,7 +90,7 @@ export function Header() {
             </DropdownMenu>
             <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
             </>
-          ) : (
+          ) : status !== 'loading' && (
             <div className="hidden md:flex items-center gap-2">
               <Button variant="outline" asChild>
                 <Link href="/login">Sign In</Link>
@@ -113,7 +126,7 @@ export function Header() {
                           </Link>
                       ))}
                   </nav>
-                  {!isSignedIn && (
+                  {status !== 'loading' && !user && (
                       <div className="mt-auto flex flex-col gap-2">
                           <Button variant="outline" asChild size="lg">
                           <Link href="/login">Sign In</Link>

@@ -10,10 +10,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Mail, FileText, Camera, Bell, CreditCard } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { useUser } from '@/context/user-context';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/lib/redux/store';
 
 export default function ProfilePage() {
-  const { user } = useUser();
+  const user = useSelector((state: RootState) => state.user.user);
 
   if (!user) {
     return (

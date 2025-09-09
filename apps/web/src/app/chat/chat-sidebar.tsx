@@ -11,10 +11,11 @@ import { SettingsDialog } from '@/components/settings-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { SheetClose } from '@/components/ui/sheet';
-import { useUser } from '@/context/user-context';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/lib/redux/store';
 
 export function ChatSidebar({ strangerName, children }: { strangerName: string, children?: React.ReactNode }) {
-    const { user } = useUser();
+    const user = useSelector((state: RootState) => state.user.user);
 
     if (!user) {
         return null;
@@ -80,10 +81,10 @@ export function ChatSidebar({ strangerName, children }: { strangerName: string, 
                     <div className='flex items-center gap-3 cursor-pointer'>
                         <Avatar className="h-10 w-10">
                             <AvatarImage src={user.avatar || undefined} data-ai-hint="person face" />
-                            <AvatarFallback>{user.email.substring(0,2)}</AvatarFallback>
+                            <AvatarFallback>{user.username.substring(0,2)}</AvatarFallback>
                         </Avatar>
                         <div>
-                            <p className="font-semibold">{user.email}</p>
+                            <p className="font-semibold">{user.username}</p>
                             <p className="text-xs text-muted-foreground">Free User</p>
                         </div>
                     </div>
