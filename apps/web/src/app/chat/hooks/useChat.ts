@@ -168,7 +168,7 @@ export function useChat() {
     handleStartSearch,
     handleEndChat,
     handleNextChat,
-_handleSendMessage,
+handleSendMessage,
     handleFileChange,
     handleReaction,
   };

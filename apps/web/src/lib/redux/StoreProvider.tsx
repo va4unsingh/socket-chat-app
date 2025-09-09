@@ -1,14 +1,29 @@
 "use client";
+import { useEffect, useRef } from "react";
+import { Provider } from "react-redux";
+import { makeStore, AppStore } from "./store";
+import { checkUserSession, login } from "./slices/userSlice";
 
-import { Provider } from 'react-redux';
-import { store } from './store';
-import { useEffect } from 'react';
-import { initializeUser } from './slices/userSlice';
+export function StoreProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const storeRef = useRef<AppStore>();
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
-    useEffect(() => {
-        store.dispatch(initializeUser());
-    }, []);
+  if (!storeRef.current) {
+    // Create the store instance the first time this renders
+    storeRef.current = makeStore();
+  }
 
-  return <Provider store={store}>{children}</Provider>;
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      storeRef.current?.dispatch(login(JSON.parse(user)));
+    } else {
+      storeRef.current?.dispatch(checkUserSession() as any);
+    }
+  }, []);
+
+  return <Provider store={storeRef.current}>{children}</Provider>;
 }

@@ -34,6 +34,13 @@ function SettingsContent() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleUpdateProfile = async (data: { username?: string; avatar?: string | null }) => {
+    // TODO: Replace with actual API call
+    console.log('Updating profile with:', data);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    // alert('Profile updated successfully!');
+  };
+
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
@@ -44,7 +51,9 @@ function SettingsContent() {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (user) {
-          dispatch(updateAvatar(reader.result as string));
+          const avatar = reader.result as string;
+          dispatch(updateAvatar(avatar));
+          handleUpdateProfile({ avatar });
         }
       };
       reader.readAsDataURL(file);
@@ -54,6 +63,7 @@ function SettingsContent() {
   const handleRemoveAvatar = () => {
     if (user) {
       dispatch(updateAvatar(null));
+      handleUpdateProfile({ avatar: null });
     }
   }
 
@@ -62,6 +72,7 @@ function SettingsContent() {
         setIsEditingUsername(false);
         if (user && user.username !== username) {
             dispatch(updateUsername(username));
+            handleUpdateProfile({ username });
         }
     }
   }
@@ -91,7 +102,7 @@ function SettingsContent() {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-2">
                          <Avatar className="h-20 w-20">
                             <AvatarImage src={user.avatar || undefined} data-ai-hint="person face" className="object-cover"/>
-                            <AvatarFallback>{user.username.substring(0,2)}</AvatarFallback>
+                            <AvatarFallback>{user.username ? user.username.substring(0, 2) : ''}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                             <div className="flex gap-2">
@@ -116,6 +127,7 @@ function SettingsContent() {
                                     setIsEditingUsername(false);
                                     if (user && user.username !== username) {
                                         dispatch(updateUsername(username));
+                                        handleUpdateProfile({ username });
                                     }
                                 }}
                                 autoFocus

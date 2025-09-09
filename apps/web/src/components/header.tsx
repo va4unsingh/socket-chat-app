@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/redux/store';
 import { logout } from '@/lib/redux/slices/userSlice';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function Header() {
   const dispatch = useDispatch();
@@ -51,10 +52,7 @@ export function Header() {
         </nav>
         <div className="ml-auto flex items-center gap-2">
           {status === 'loading' && (
-            <div className="hidden md:flex items-center gap-2">
-              <Button variant="outline" disabled>Sign In</Button>
-              <Button disabled>Sign Up</Button>
-            </div>
+            <Skeleton className="h-9 w-9 rounded-full" />
           )}
           {status !== 'loading' && user ? (
             <>
@@ -63,14 +61,14 @@ export function Header() {
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
                     <AvatarImage src={user.avatar || 'https://picsum.photos/100/100'} data-ai-hint="person face" className="object-cover" />
-                    <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{user.username ? user.username.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.username}</p>
+                    <p className="text-sm font-medium leading-none">{user.username || 'User'}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -122,6 +120,12 @@ export function Header() {
                           </Link>
                       ))}
                   </nav>
+                  {status === 'loading' && (
+                      <div className="mt-auto flex flex-col gap-2">
+                          <Skeleton className="h-12 w-full" />
+                          <Skeleton className="h-12 w-full" />
+                      </div>
+                  )}
                   {status !== 'loading' && !user && (
                       <div className="mt-auto flex flex-col gap-2">
                           <Button variant="outline" asChild size="lg">

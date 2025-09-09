@@ -27,13 +27,13 @@ export default function LoginPage() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3020/api/v1/auth/signin", // backend login route
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/signin`, // backend login route
         { identifier, password }
       );
 
       // Optionally save token/session if returned
       localStorage.setItem("token", response.data.token);
-      dispatch(login({ email: response.data.user?.email || identifier }));
+      dispatch(login(response.data.user));
 
       router.push("/"); // redirect after successful login
     } catch (err: any) {

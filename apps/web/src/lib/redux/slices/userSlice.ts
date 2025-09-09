@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
 const adjectives = ['Silent', 'Swift', 'Hidden', 'Mystic', 'Shadow', 'Phantom', 'Quiet', 'Invisible'];
 const nouns = ['Whisper', 'Specter', 'Ghost', 'Echo', 'Shade', 'Cipher', 'Rogue', 'Voyager'];
@@ -11,31 +12,43 @@ const generateRandomUsername = () => {
 };
 
 interface User {
+  id: string;
   email: string;
   username: string;
   avatar?: string | null;
 }
 
-interface UserState {
+export interface UserState {
   user: User | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
 }
 
 const initialState: UserState = {
   user: null,
-  status: 'idle',
+  status: 'loading',
 };
+
+export const checkUserSession = createAsyncThunk(
+  'user/checkSession',
+  async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`);
+      return response.data.user;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    login: (state, action: PayloadAction<Omit<User, 'username'>>) => {
-      const user = { ...action.payload, username: generateRandomUsername() };
-      state.user = user;
+    login: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
       state.status = 'succeeded';
       if (typeof window !== 'undefined') {
-        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('user', JSON.stringify(action.payload));
       }
     },
     logout: (state) => {
@@ -44,18 +57,6 @@ const userSlice = createSlice({
       if (typeof window !== 'undefined') {
         localStorage.removeItem('user');
       }
-    },
-    initializeUser: (state) => {
-        state.status = 'loading';
-        if (typeof window !== 'undefined') {
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) {
-                state.user = JSON.parse(storedUser);
-                state.status = 'succeeded';
-            } else {
-                state.status = 'idle';
-            }
-        }
     },
     updateUsername: (state, action: PayloadAction<string>) => {
         if (state.user) {
@@ -75,7 +76,21 @@ const userSlice = createSlice({
         }
     }
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(checkUserSession.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(checkUserSession.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.user = action.payload;
+      })
+      .addCase(checkUserSession.rejected, (state) => {
+        state.status = 'failed';
+        state.user = null;
+      });
+  },
 });
 
-export const { login, logout, initializeUser, updateUsername, updateAvatar } = userSlice.actions;
+export const { login, logout, updateUsername, updateAvatar } = userSlice.actions;
 export default userSlice.reducer;

@@ -14,7 +14,7 @@ import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Copy } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { SettingsDialog } from './settings-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSelector } from 'react-redux';
@@ -22,14 +22,14 @@ import { RootState } from '@/lib/redux/store';
 
 
 function ProfileContent() {
-    const { toast } = useToast();
     const user = useSelector((state: RootState) => state.user.user);
     const handleIdCopy = () => {
-        navigator.clipboard.writeText('68b4a9e4d41301c47dd5f09a');
-        toast({
-            title: 'Copied to clipboard!',
-            description: 'Your user ID has been copied.',
-        });
+        if (user && user.id) {
+            navigator.clipboard.writeText(user.id);
+            toast('Copied to clipboard!', {
+                description: 'Your user ID has been copied.',
+            });
+        }
     }
 
     if (!user) {
@@ -43,7 +43,7 @@ function ProfileContent() {
                     <div className="relative">
                         <Avatar className="h-24 w-24 border-4 border-background" >
                             <AvatarImage src={user.avatar || 'https://picsum.photos/200'} data-ai-hint="person face" className="object-cover"/>
-                            <AvatarFallback>{user.username.substring(0,2)}</AvatarFallback>
+                            <AvatarFallback>{user.username ? user.username.substring(0, 2) : ''}</AvatarFallback>
                         </Avatar>
                     </div>
                 </div>
@@ -55,7 +55,7 @@ function ProfileContent() {
                         <h2 className="text-2xl font-bold">{user.username}</h2>
                     </div>
                     <p className="text-sm text-muted-foreground font-mono cursor-pointer" onClick={handleIdCopy}>
-                        ID: 68b4a9e4d41301c47dd5f09a <Copy className="inline h-3 w-3 ml-1"/>
+                        ID: {user.id} <Copy className="inline h-3 w-3 ml-1"/>
                     </p>
                     <Separator className="my-4"/>
                     <div>

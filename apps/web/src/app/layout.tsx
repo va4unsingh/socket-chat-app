@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster as SonnerToaster } from 'sonner';
 import { cn } from '@/lib/utils';
 import { FooterWrapper } from '@/components/footer-wrapper';
 import { StoreProvider } from '@/lib/redux/StoreProvider';
-import { ReduxInitializer } from '@/lib/redux/ReduxInitializer';
 import { ThemeProvider } from '@/components/theme-provider';
 import { CommandPalette } from '@/components/command-palette';
 
@@ -42,13 +41,11 @@ export default function RootLayout({
           enableSystem
         >
           <StoreProvider>
-            <ReduxInitializer>
               <div className="flex flex-col min-h-[100dvh]">
                 {children}
                 <FooterWrapper />
               </div>
-              <Toaster />
-            </ReduxInitializer>
+              <SonnerToaster />
           </StoreProvider>
           <CommandPalette />
         </ThemeProvider>

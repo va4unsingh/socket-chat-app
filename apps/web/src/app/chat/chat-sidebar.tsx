@@ -1,5 +1,5 @@
 
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { SheetClose } from '@/components/ui/sheet';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/redux/store';
+import { ProfileDialog } from '@/components/profile-dialog';
 
 export function ChatSidebar({ strangerName, children }: { strangerName: string, children?: React.ReactNode }) {
     const user = useSelector((state: RootState) => state.user.user);
@@ -78,16 +79,18 @@ export function ChatSidebar({ strangerName, children }: { strangerName: string, 
                     </CardContent>
                 </Card>
                 <div className="flex items-center justify-between gap-3 p-3 bg-transparent border-0 shadow-none rounded-lg">
-                    <div className='flex items-center gap-3 cursor-pointer'>
-                        <Avatar className="h-10 w-10">
-                            <AvatarImage src={user.avatar || undefined} data-ai-hint="person face" />
-                            <AvatarFallback>{user.username.substring(0,2)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <p className="font-semibold">{user.username}</p>
-                            <p className="text-xs text-muted-foreground">Free User</p>
+                    <ProfileDialog>
+                        <div className='flex items-center gap-3 cursor-pointer'>
+                            <Avatar className="h-10 w-10">
+                                <AvatarImage src={user.avatar || undefined} data-ai-hint="person face" />
+                                <AvatarFallback>{user.username ? user.username.substring(0, 2) : ''}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold">{user.username}</p>
+                                <p className="text-xs text-muted-foreground">Free User</p>
+                            </div>
                         </div>
-                    </div>
+                    </ProfileDialog>
                     <SettingsDialog>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                             <Settings className="h-4 w-4" />
