@@ -1,23 +1,23 @@
 import mongoose, { Document } from "mongoose";
 
 interface IChat extends Document {
-  type: "direct" | "group";
+  // type: "direct" | "group";
   participants: mongoose.Types.ObjectId[];
-  name?: string;
-  admin?: mongoose.Types.ObjectId[];
-  lastMessage?: mongoose.Types.ObjectId[];
-  lastActivity: Date;
+  // name?: string;
+  // admin?: mongoose.Types.ObjectId[];
+  // lastMessage?: mongoose.Types.ObjectId[];
+  // lastActivity: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const chatSchema = new mongoose.Schema<IChat>(
   {
-    type: {
-      type: String,
-      enum: ["direct", "group"],
-      default: "direct",
-    },
+    // type: {
+    //   type: String,
+    //   enum: ["direct", "group"],
+    //   default: "direct",
+    // },
 
     participants: [
       {
@@ -28,21 +28,21 @@ const chatSchema = new mongoose.Schema<IChat>(
     ],
 
     // For group chat only
-    name: {
-      type: String,
-      trim: true,
-      maxlength: [50, "Group name cannot exceed 50 characters"],
-    },
+    // name: {
+    //   type: String,
+    //   trim: true,
+    //   maxlength: [50, "Group name cannot exceed 50 characters"],
+    // },
 
-    admin: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+    // admin: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "User",
+    // },
 
-    lastActivity: {
-      type: Date,
-      default: Date.now,
-    },
+    // lastActivity: {
+    //   type: Date,
+    //   default: Date.now,
+    // },
   },
   {
     timestamps: true,

@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { FooterWrapper } from '@/components/footer-wrapper';
 import { UserProvider } from '@/context/user-context';
 import { ThemeProvider } from '@/components/theme-provider';
+import { CommandPalette } from '@/components/command-palette';
 
 export const metadata: Metadata = {
   title: 'WhisperLink',
@@ -46,6 +47,7 @@ export default function RootLayout({
             </div>
             <Toaster />
           </UserProvider>
+          <CommandPalette />
         </ThemeProvider>
       </body>
     </html>

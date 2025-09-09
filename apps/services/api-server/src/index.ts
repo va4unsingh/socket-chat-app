@@ -9,7 +9,7 @@ import dbConnect from "@repo/db/mongo";
 
 import { authRoutes, chatRoutes, userRoutes } from "./routes";
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 7020;
 
 const app = express();
 

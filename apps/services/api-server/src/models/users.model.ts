@@ -12,12 +12,12 @@ interface RefreshTokenData {
 
 interface IUser extends Document {
   _id: string;
-  firstname: string;
-  lastname: string;
-  username: string;
+  // firstname: string;
+  // lastname: string;
+  // username: string;
   email: string;
   password: string;
-  role: "user" | "admin";
+  // role: "user" | "admin";
   isVerified: boolean;
   verificationToken?: string;
   verificationTokenExpires?: Date;
@@ -52,30 +52,30 @@ interface IUser extends Document {
 
 const userSchema = new mongoose.Schema<IUser>(
   {
-    firstname: {
-      type: String,
-      required: [true, "First name is required"],
-      trim: true,
-      maxlength: [50, "First name cannot exceed 50 characters"],
-    },
+    // firstname: {
+    //   type: String,
+    //   required: [true, "First name is required"],
+    //   trim: true,
+    //   maxlength: [50, "First name cannot exceed 50 characters"],
+    // },
 
-    lastname: {
-      type: String,
-      required: [true, "Last name is required"],
-      trim: true,
-      maxlength: [50, "Last name cannot exceed 50 characters"],
-    },
+    // lastname: {
+    //   type: String,
+    //   required: [true, "Last name is required"],
+    //   trim: true,
+    //   maxlength: [50, "Last name cannot exceed 50 characters"],
+    // },
 
-    username: {
-      type: String,
-      required: [true, "Username is required"],
-      unique: true,
-      trim: true,
-      lowercase: true,
-      minlength: [3, "Username must be at least 3 characters"],
-      maxlength: [30, "Username cannot exceed 30 characters"],
-      index: true,
-    },
+    // username: {
+    //   type: String,
+    //   required: [true, "Username is required"],
+    //   unique: true,
+    //   trim: true,
+    //   lowercase: true,
+    //   minlength: [3, "Username must be at least 3 characters"],
+    //   maxlength: [30, "Username cannot exceed 30 characters"],
+    //   index: true,
+    // },
 
     email: {
       type: String,
@@ -97,12 +97,12 @@ const userSchema = new mongoose.Schema<IUser>(
       select: false,
     },
 
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-      index: true,
-    },
+    // role: {
+    //   type: String,
+    //   enum: ["user", "admin"],
+    //   default: "user",
+    //   index: true,
+    // },
 
     isVerified: {
       type: Boolean,
@@ -210,10 +210,10 @@ userSchema.methods.generateAccessToken = function (): string {
     {
       _id: this._id,
       email: this.email,
-      username: this.username,
-      firstname: this.firstname,
-      lastname: this.lastname,
-      role: this.role,
+      // username: this.username,
+      // firstname: this.firstname,
+      // lastname: this.lastname,
+      // role: this.role,
     },
     process.env.ACCESS_TOKEN_SECRET!,
     {

@@ -74,26 +74,21 @@ const signUp = async (req: Request, res: Response) => {
       });
     }
 
-    const { firstname, lastname, username, email, password } = parsedBody.data;
+    const { email, password } = parsedBody.data;
 
-    const existingUser = await User.findOne({
-      $or: [{ username }, { email }],
-    });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(409).json({
-        message:
-          existingUser.username === username
-            ? "Username already taken"
-            : "Email already registered",
+        message: "Email already registered",
         success: false,
       });
     }
 
     const user = await User.create({
-      firstname,
-      lastname,
-      username,
+      // firstname,
+      // lastname,
+      // username,
       email,
       password,
     });
@@ -140,9 +135,9 @@ const signUp = async (req: Request, res: Response) => {
       success: true,
       user: {
         id: user._id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        username: user.username,
+        // firstname: user.firstname,
+        // lastname: user.lastname,
+        // username: user.username,
         email: user.email,
         isVerified: user.isVerified,
       },
@@ -172,7 +167,7 @@ const signIn = async (req: Request, res: Response) => {
     const { identifier, password } = parsedBody.data;
 
     const user = await User.findOne({
-      $or: [{ email: identifier }, { username: identifier }],
+      email: identifier,
     }).select("+password");
 
     if (!user) {
@@ -182,12 +177,12 @@ const signIn = async (req: Request, res: Response) => {
       });
     }
 
-    if (!user.isVerified) {
-      return res.status(403).json({
-        message: "Please verify your email before signing in",
-        success: false,
-      });
-    }
+    // if (!user.isVerified) {
+    //   return res.status(403).json({
+    //     message: "Please verify your email before signing in",
+    //     success: false,
+    //   });
+    // }
 
     const isPasswordValid = await user.isPasswordCorrect(password);
 
@@ -368,9 +363,7 @@ const forgotPassword = async (req: Request, res: Response) => {
 
     const { identifier } = parsedBody.data;
 
-    const user = await User.findOne({
-      $or: [{ username: identifier }, { email: identifier }],
-    });
+    const user = await User.findOne({ email: identifier });
 
     if (!user) {
       return res.status(400).json({
@@ -783,15 +776,15 @@ const updateAccountDetails = async (req: Request, res: Response) => {
       });
     }
 
-    const { firstname, lastname, email, username } = parsedBody.data;
+    const { email } = parsedBody.data;
 
     const user = await User.findByIdAndUpdate(
       req.user?._id,
       {
         $set: {
-          firstname,
-          lastname,
-          username,
+          // firstname,
+          // lastname,
+          // username,
           email,
         },
       },

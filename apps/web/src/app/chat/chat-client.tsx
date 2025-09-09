@@ -1,13 +1,12 @@
-
 "use client";
 
-import { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Loader, Send, Bot, User, MessageSquare, Shield, Zap, Twitter, Instagram, X, Search, Tag, PanelLeft, Gem, History, UserPlus, Bell } from 'lucide-react';
+import { Loader, Send, Bot, User, MessageSquare, Shield, Zap, Twitter, Instagram, X, Search, Tag, PanelLeft, Gem, History, UserPlus, Bell, Smile, Check, CheckCheck, Paperclip, File as FileIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,12 +18,20 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle,
 import { FriendRequestDialog } from '@/components/friend-request-dialog';
 import { NotificationsDialog } from '@/components/notifications-dialog';
 import { useUser } from '@/context/user-context';
-
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import Image from 'next/image';
 
 type Message = {
   id: number;
-  text: string;
   sender: 'user' | 'stranger' | 'system';
+  text?: string;
+  reactions?: { [emoji: string]: ('user' | 'stranger')[]; };
+  status?: 'sent' | 'delivered' | 'read';
+  file?: {
+    name: string;
+    url: string;
+    type: 'image' | 'other';
+  };
 };
 
 type ChatStatus = 'idle' | 'searching' | 'chatting' | 'ended';
@@ -32,6 +39,7 @@ type ChatStatus = 'idle' | 'searching' | 'chatting' | 'ended';
 interface ChatClientProps {
 }
 
+const EMOJI_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
 
 export default function ChatClient({ }: ChatClientProps) {
   const { username, avatar } = useUser();
@@ -44,6 +52,8 @@ export default function ChatClient({ }: ChatClientProps) {
   const [strangerName, setStrangerName] = useState('Stranger');
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isStrangerTyping, setIsStrangerTyping] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Placeholder for user's subscription status
   const isProUser = false;
@@ -55,29 +65,35 @@ export default function ChatClient({ }: ChatClientProps) {
         behavior: 'smooth',
       });
     }
-  }, [messages]);
+  }, [messages, isStrangerTyping]);
 
-  const addMessage = (text: string, sender: 'user' | 'stranger' | 'system') => {
-    setMessages((prev) => [...prev, { id: Date.now(), text, sender }]);
+  const addMessage = (message: Omit<Message, 'id' | 'reactions'>) => {
+    const newMessage: Message = {
+      id: Date.now(),
+      ...message,
+      reactions: {},
+    };
+    setMessages((prev) => [...prev, newMessage]);
+    return newMessage.id;
   };
 
   const handleStartSearch = () => {
     setMessages([]);
     setStatus('searching');
-    addMessage('Finding a stranger with similar interests...', 'system');
+    addMessage({ text: 'Finding a stranger with similar interests...', sender: 'system' });
     // Simulate finding a match
     setTimeout(() => {
         const randomNames = ['CyberNomad', 'PixelPioneer', 'GlitchArtisan', 'DataDaemon', 'SynthWaveRider'];
         const name = randomNames[Math.floor(Math.random() * randomNames.length)];
         setStrangerName(name);
         setStatus('chatting');
-        addMessage(`You have connected with ${name}. Say hi!`, 'system');
+        addMessage({ text: `You have connected with ${name}. Say hi!`, sender: 'system' });
     }, 2500);
   };
 
   const handleEndChat = () => {
     if (status === 'chatting') {
-      addMessage('You have disconnected.', 'system');
+      addMessage({ text: 'You have disconnected.', sender: 'system' });
       setStatus('ended');
     }
   };
@@ -91,13 +107,46 @@ export default function ChatClient({ }: ChatClientProps) {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue.trim() === '' || status !== 'chatting') return;
-    addMessage(inputValue, 'user');
+    const messageId = addMessage({ text: inputValue, sender: 'user', status: 'sent' });
     setInputValue('');
 
-    // Simulate stranger's response
+    // Simulate delivery and read receipts
     setTimeout(() => {
-      addMessage('This is a simulated response from the stranger.', 'stranger');
-    }, 1000 + Math.random() * 1000);
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, status: 'delivered' } : m));
+    }, 600);
+
+    const typingDuration = 1200 + Math.random() * 1000;
+    
+    setTimeout(() => {
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, status: 'read' } : m));
+        setIsStrangerTyping(true);
+    }, 1500)
+
+    setTimeout(() => {
+      setIsStrangerTyping(false); 
+      addMessage({ text: 'This is a simulated response from the stranger.', sender: 'stranger' });
+    }, 1500 + typingDuration);
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileUrl = URL.createObjectURL(file);
+    const fileType = file.type.startsWith('image/') ? 'image' : 'other';
+
+    addMessage({
+      sender: 'user',
+      status: 'sent',
+      file: {
+        name: file.name,
+        url: fileUrl,
+        type: fileType,
+      },
+    });
+    
+    // Reset file input
+    e.target.value = '';
   };
   
   const handleInterestInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -115,6 +164,58 @@ export default function ChatClient({ }: ChatClientProps) {
     setInterests(prev => prev.filter(i => i !== interestToRemove));
   };
 
+  const handleReaction = (messageId: number, emoji: string) => {
+    setMessages(messages.map(msg => {
+      if (msg.id === messageId) {
+        const newReactions = { ...(msg.reactions || {}) };
+
+        // Find if the user has an existing reaction
+        const userExistingReaction = Object.entries(newReactions).find(([_, senders]) => senders.includes('user'));
+
+        // If user has an existing reaction, remove it
+        if (userExistingReaction) {
+          const [existingEmoji] = userExistingReaction;
+          newReactions[existingEmoji] = newReactions[existingEmoji].filter(r => r !== 'user');
+          if (newReactions[existingEmoji].length === 0) {
+            delete newReactions[existingEmoji];
+          }
+        }
+
+        // If the clicked emoji is different from the one they had, or if they had none, add the new one.
+        if (!userExistingReaction || userExistingReaction[0] !== emoji) {
+          if (!newReactions[emoji]) {
+            newReactions[emoji] = [];
+          }
+          newReactions[emoji].push('user');
+        }
+
+        return { ...msg, reactions: newReactions };
+      }
+      return msg;
+    }));
+
+    // Simulate stranger reacting back
+    if (Math.random() > 0.5) {
+        setTimeout(() => {
+            setMessages(prevMessages => prevMessages.map(msg => {
+                if (msg.id === messageId) {
+                    const newReactions = { ...(msg.reactions || {}) };
+                    const randomEmoji = EMOJI_REACTIONS[Math.floor(Math.random() * EMOJI_REACTIONS.length)];
+                    
+                    if (!newReactions[randomEmoji]) {
+                        newReactions[randomEmoji] = [];
+                    }
+                    if (!newReactions[randomEmoji].includes('stranger')) {
+                        newReactions[randomEmoji].push('stranger');
+                    }
+                    return { ...msg, reactions: newReactions };
+                }
+                return msg;
+            }));
+        }, 800);
+    }
+  };
+
 
   return (
     <div className="h-full bg-background/90 relative flex flex-col">
@@ -130,7 +231,7 @@ export default function ChatClient({ }: ChatClientProps) {
                     </div>
                 </div>
                 
-                <Card className="mb-8 p-6 text-left bg-card/80 backdrop-blur-sm border-primary/20">
+                <Card id="onboarding-interests" className="mb-8 p-6 text-left bg-card/80 backdrop-blur-sm border-primary/20">
                   <div className="space-y-6">
                      <div>
                           <h3 className="font-semibold mb-3 text-lg flex items-center gap-2"><Tag className="h-5 w-5" />Interests</h3>
@@ -190,7 +291,7 @@ export default function ChatClient({ }: ChatClientProps) {
                   </div>
                 </Card>
 
-                <Button size="lg" className="h-12 px-8 text-lg w-full" onClick={handleStartSearch}>
+                <Button id="onboarding-start-chat" size="lg" className="h-12 px-8 text-lg w-full" onClick={handleStartSearch}>
                    <MessageSquare className="mr-2 h-5 w-5" />
                     Start Chat
                 </Button>
@@ -244,46 +345,116 @@ export default function ChatClient({ }: ChatClientProps) {
             </div>
             <ScrollArea className="flex-1" viewportRef={scrollAreaViewportRef}>
                 <div className="space-y-4 max-w-4xl mx-auto w-full p-4">
-                {messages.map((message) => (
-                    <div
-                    key={message.id}
-                    className={cn('flex items-end gap-2', {
-                        'justify-end': message.sender === 'user',
-                        'justify-start': message.sender === 'stranger',
-                        'justify-center': message.sender === 'system',
-                    })}
-                    >
-                    {message.sender === 'stranger' && (
-                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-secondary text-secondary-foreground">
-                        <Bot size={20} />
+                    {messages.map((message) => (
+                        <div key={message.id} className="group relative">
+                            <div
+                                className={cn('flex items-end gap-2', {
+                                    'justify-end': message.sender === 'user',
+                                    'justify-start': message.sender === 'stranger',
+                                    'justify-center': message.sender === 'system',
+                                })}
+                            >
+                                {message.sender === 'stranger' && (
+                                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-secondary text-secondary-foreground">
+                                        <Bot size={20} />
+                                    </div>
+                                )}
+                                {message.sender === 'system' ? (
+                                    <div className="text-xs text-muted-foreground italic px-4 py-1 bg-muted rounded-full flex items-center gap-2">
+                                        {status === 'searching' && <Loader className="h-4 w-4 animate-spin" />}
+                                        {message.text}
+                                    </div>
+                                ) : (
+                                    <div className={cn('relative group flex items-center', {
+                                        'flex-row-reverse': message.sender === 'user'
+                                    })}>
+                                        {message.file?.type === 'image' ? (
+                                            <Image src={message.file.url} alt={message.file.name} width={200} height={200} className="rounded-md" />
+                                        ) : (
+                                            <div className={cn('whitespace-pre-wrap rounded-lg px-4 py-2 break-words max-w-[75%] md:max-w-[85%]', {
+                                                'bg-primary text-primary-foreground': message.sender === 'user',
+                                                'bg-muted': message.sender === 'stranger',
+                                            })}>
+                                                {message.text}
+                                                {message.file?.type === 'other' && (
+                                                    <div className="flex items-center gap-2 p-2 rounded-md bg-background/50 mt-2">
+                                                        <FileIcon className="h-6 w-6" />
+                                                        <span>{message.file.name}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                        {message.sender !== 'system' && (
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className={cn("h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity mx-1", {
+                                                        })}
+                                                    >
+                                                        <Smile className="h-4 w-4" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-1">
+                                                    <div className="flex gap-1">
+                                                        {EMOJI_REACTIONS.map(emoji => (
+                                                            <Button
+                                                                key={emoji}
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 rounded-full"
+                                                                onClick={() => handleReaction(message.id, emoji)}
+                                                            >
+                                                                {emoji}
+                                                            </Button>
+                                                        ))}
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
+                                        )}
+                                    </div>
+                                )}
+                                {message.sender === 'user' && (
+                                    <div className="flex items-end gap-1">
+                                        <div className="flex items-center h-8">
+                                        {message.status === 'read' && <CheckCheck size={16} className="text-blue-500" />}
+                                        {message.status === 'delivered' && <CheckCheck size={16} className="text-muted-foreground" />}
+                                        {message.status === 'sent' && <Check size={16} className="text-muted-foreground" />}
+                                        </div>
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage src={avatar || undefined} />
+                                            <AvatarFallback>{username.substring(0, 2)}</AvatarFallback>
+                                        </Avatar>
+                                    </div>
+                                )}
+                            </div>
+                            {message.reactions && Object.keys(message.reactions).length > 0 && (
+                                <div className={cn("flex gap-1 mt-1", {
+                                    'justify-end pr-10': message.sender === 'user',
+                                    'justify-start pl-10': message.sender === 'stranger',
+                                })}>
+                                    {Object.entries(message.reactions).map(([emoji, senders]) => (
+                                        <Badge key={emoji} variant="secondary" className="py-0.5 px-1.5 shadow-sm">
+                                            {emoji} {senders.length > 1 ? <span className="text-xs ml-1">{senders.length}</span> : null}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                    {isStrangerTyping && (
+                        <div className="flex items-end gap-2 justify-start">
+                            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-secondary text-secondary-foreground">
+                                <Bot size={20} />
+                            </div>
+                            <div className="bg-muted rounded-lg px-4 py-2 flex items-center gap-2">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-0"></div>
+                                <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-150"></div>
+                                <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-300"></div>
+                            </div>
                         </div>
                     )}
-                    {message.sender === 'system' ? (
-                        <div className="text-xs text-muted-foreground italic px-4 py-1 bg-muted rounded-full flex items-center gap-2">
-                        {status === 'searching' && <Loader className="h-4 w-4 animate-spin" />}
-                        {message.text}
-                        </div>
-                    ) : (
-                        <div
-                        className={cn(
-                            'rounded-lg px-4 py-2 max-w-[75%] break-words',
-                            {
-                            'bg-primary text-primary-foreground': message.sender === 'user',
-                            'bg-muted': message.sender === 'stranger',
-                            }
-                        )}
-                        >
-                        {message.text}
-                        </div>
-                    )}
-                    {message.sender === 'user' && (
-                        <Avatar className="h-8 w-8">
-                            <AvatarImage src={avatar || undefined} />
-                            <AvatarFallback>{username.substring(0, 2)}</AvatarFallback>
-                        </Avatar>
-                    )}
-                    </div>
-                ))}
                 </div>
             </ScrollArea>
             
@@ -292,10 +463,14 @@ export default function ChatClient({ }: ChatClientProps) {
                     <Button variant="outline" onClick={handleEndChat} disabled={status !== 'chatting'}>
                         End
                     </Button>
-                    <Button onClick={handleNextChat} disabled={status === 'searching'}>
+                    <Button onClick={handleNextChat} disabled={status !== 'searching'}>
                         Next
                     </Button>
                     <form onSubmit={handleSendMessage} className="flex-1 flex items-center space-x-2">
+                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,application/pdf"/>
+                        <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} disabled={status !== 'chatting'}>
+                            <Paperclip className="h-4 w-4" />
+                        </Button>
                         <Input
                         id="message"
                         placeholder="Type your message..."
@@ -305,7 +480,7 @@ export default function ChatClient({ }: ChatClientProps) {
                         onChange={(e) => setInputValue(e.target.value)}
                         disabled={status !== 'chatting'}
                         />
-                        <Button type="submit" size="icon" disabled={status !== 'chatting'}>
+                        <Button type="submit" size="icon" disabled={status !== 'chatting' || (!inputValue.trim() && !fileInputRef.current?.files?.length)}>
                         <Send className="h-4 w-4" />
                         <span className="sr-only">Send</span>
                         </Button>
@@ -317,7 +492,3 @@ export default function ChatClient({ }: ChatClientProps) {
     </div>
   );
 }
-    
-    
-
-    
