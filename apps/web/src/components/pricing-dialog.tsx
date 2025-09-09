@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import {
@@ -15,68 +15,24 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { plans } from '@/lib/pricing';
 import { CheckIcon, X, Star, ShieldCheck, Video, Image as ImageIcon, MessageCircle, Crown, Zap, Filter, History, EyeOff, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from './ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeInUp, hoverScale, iconHover } from '@/lib/animations';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/lib/redux/store';
+import { LoginDialog } from './login-dialog';
 
-const allFeatures = [
-  { text: 'Priority Matching', icon: Star, proOnly: false },
-  { text: 'Advanced Gender Filter', icon: Filter, proOnly: false },
-  { text: 'Send Images in Chat', icon: ImageIcon, proOnly: false },
-  { text: 'Basic Profile Badge', icon: Star, proOnly: false },
-  { text: 'Highest Priority Matching', icon: Crown, proOnly: true },
-  { text: 'Advanced Filters (Region, etc.)', icon: Filter, proOnly: true },
-  { text: 'Send Images, GIFs, & Videos', icon: Video, proOnly: true },
-  { text: 'Premium Animated Profile Badge', icon: Crown, proOnly: true },
-];
 
-const plans = {
-  monthly: [
-    {
-      name: 'Basic',
-      price: '$4.99',
-      priceFrequency: '/month',
-      description: 'Unlock essential features to enhance your chatting experience.',
-      features: allFeatures,
-      cta: 'Get Started with Basic',
-    },
-    {
-      name: 'Pro',
-      price: '$8.99',
-      priceFrequency: '/month',
-      isPopular: true,
-      description: 'The ultimate toolkit for the serious chatter, with every feature unlocked.',
-      features: allFeatures,
-      cta: 'Go Pro',
-    },
-  ],
-  yearly: [
-    {
-      name: 'Basic',
-      price: '$49.99',
-      priceFrequency: '/year',
-      description: 'Unlock essential features to enhance your chatting experience.',
-      features: allFeatures,
-      cta: 'Get Started with Basic',
-    },
-    {
-      name: 'Pro',
-      price: '$89.99',
-      priceFrequency: '/year',
-      isPopular: true,
-      description: 'The ultimate toolkit for the serious chatter, with every feature unlocked.',
-      features: allFeatures,
-      cta: 'Go Pro',
-    },
-  ],
-};
 
 function PricingContent() {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [expandedCards, setExpandedCards] = useState<string[]>([]);
+    const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+    const user = useSelector((state: RootState) => state.user.user);
 
     const handleToggle = (isChecked: boolean) => {
         setBillingCycle(isChecked ? 'yearly' : 'monthly');
@@ -91,6 +47,15 @@ function PricingContent() {
     };
     
     const currentPlans = plans[billingCycle];
+
+    const handleBuyClick = () => {
+        if (!user) {
+            setIsLoginDialogOpen(true);
+        } else {
+            // Proceed to checkout
+            console.log('Proceeding to checkout');
+        }
+    }
 
     return (
         <>
@@ -183,6 +148,7 @@ function PricingContent() {
                         </CardContent>
                         <CardFooter className="p-10 pt-0 mt-auto">
                             <Button
+                                onClick={handleBuyClick}
                                 className={cn("w-full h-12 text-lg font-semibold", plan.isPopular && "bg-gold hover:bg-gold/90 text-gold-foreground")}
                                 variant={plan.isPopular ? 'default' : 'outline'}
                             >
@@ -195,6 +161,7 @@ function PricingContent() {
               ))}
             </motion.div>
         </ScrollArea>
+        <LoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
         </>
     );
 }

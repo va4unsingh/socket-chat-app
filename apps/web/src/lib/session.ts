@@ -4,7 +4,8 @@ import { jwtVerify } from 'jose';
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-jwt-key-that-is-at-least-32-bytes-long');
 
 export async function getSession() {
-  const token = cookies().get('token')?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
 
   if (!token) {
     return null;

@@ -24,6 +24,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/redux/store';
 import { updateUsername, updateAvatar } from '@/lib/redux/slices/userSlice';
 import { useTheme } from 'next-themes';
+import { toast } from 'sonner';
 
 function SettingsContent() {
   const dispatch = useDispatch();
@@ -38,7 +39,7 @@ function SettingsContent() {
     // TODO: Replace with actual API call
     console.log('Updating profile with:', data);
     await new Promise(resolve => setTimeout(resolve, 1000));
-    // alert('Profile updated successfully!');
+    toast.success('Profile updated successfully!');
   };
 
   const handleAvatarClick = () => {

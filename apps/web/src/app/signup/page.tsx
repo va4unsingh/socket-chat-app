@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,12 +6,13 @@ import { Logo, GoogleIcon } from "@/components/icons";
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState } from "react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import { signup } from "@/lib/api";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -22,14 +23,11 @@ export default function SignupPage() {
     setError("");
 
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/signup`,
-        {
-          email: identifier,
-          password,
-        }
-      );
-      alert(response.data.message || "Account created successfully!");
+      const response = await signup({
+        email,
+        password,
+      });
+      toast.success(response.data.message || "Account created successfully!");
       router.push("/login");
     } catch (err: any) {
       setError(
@@ -59,13 +57,13 @@ export default function SignupPage() {
           </div>
           <form className="grid gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-2">
-              <Label htmlFor="identifier">Email</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>

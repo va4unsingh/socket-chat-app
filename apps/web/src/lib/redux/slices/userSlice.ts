@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { checkUserSession as checkUserSessionApi, logout as logoutApi } from '@/lib/api';
 
 const adjectives = ['Silent', 'Swift', 'Hidden', 'Mystic', 'Shadow', 'Phantom', 'Quiet', 'Invisible'];
 const nouns = ['Whisper', 'Specter', 'Ghost', 'Echo', 'Shade', 'Cipher', 'Rogue', 'Voyager'];
@@ -32,13 +32,21 @@ export const checkUserSession = createAsyncThunk(
   'user/checkSession',
   async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`);
+      const response = await checkUserSessionApi();
       return response.data.user;
     } catch (error) {
       throw error;
     }
   }
 );
+
+export const logoutUser = createAsyncThunk('user/logout', async () => {
+  try {
+    await logoutApi();
+  } catch (error) {
+    throw error;
+  }
+});
 
 const userSlice = createSlice({
   name: 'user',
@@ -49,13 +57,6 @@ const userSlice = createSlice({
       state.status = 'succeeded';
       if (typeof window !== 'undefined') {
         localStorage.setItem('user', JSON.stringify(action.payload));
-      }
-    },
-    logout: (state) => {
-      state.user = null;
-      state.status = 'idle';
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('user');
       }
     },
     updateUsername: (state, action: PayloadAction<string>) => {
@@ -88,9 +89,16 @@ const userSlice = createSlice({
       .addCase(checkUserSession.rejected, (state) => {
         state.status = 'failed';
         state.user = null;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.status = 'idle';
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('user');
+        }
       });
   },
 });
 
-export const { login, logout, updateUsername, updateAvatar } = userSlice.actions;
+export const { login, updateUsername, updateAvatar } = userSlice.actions;
 export default userSlice.reducer;

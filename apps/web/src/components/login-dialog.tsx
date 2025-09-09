@@ -7,13 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo, GoogleIcon } from "@/components/icons";
 import Link from "next/link";
-import Image from "next/image";
 import { useDispatch } from "react-redux";
 import { login as loginAction } from "@/lib/redux/slices/userSlice";
 import { login } from "@/lib/api";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+interface LoginDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onLoginSuccess?: () => void;
+}
+
+export function LoginDialog({ open, onOpenChange, onLoginSuccess }: LoginDialogProps) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [identifier, setIdentifier] = useState("");
@@ -33,8 +39,8 @@ export default function LoginPage() {
       localStorage.setItem("token", response.data.token);
       dispatch(loginAction(response.data.user));
       toast.success("Logged in successfully!");
-
-      router.push("/"); // redirect after successful login
+      onOpenChange(false);
+      onLoginSuccess?.();
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Login failed");
     } finally {
@@ -43,10 +49,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
-      <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[350px] gap-6">
-          <div className="grid gap-2 text-center">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-center">
             <Link
               href="/"
               className="flex items-center justify-center gap-2 text-2xl font-bold mb-4"
@@ -54,13 +60,13 @@ export default function LoginPage() {
               <Logo className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold">WhisperLink</span>
             </Link>
-            <h1 className="text-3xl font-bold">Welcome Back</h1>
-            <p className="text-balance text-muted-foreground">
-              Enter your credentials to access your account
-            </p>
-          </div>
-
-          <form className="grid gap-4" onSubmit={handleSubmit}>
+            Welcome Back
+          </DialogTitle>
+          <DialogDescription className="text-center">
+            Enter your credentials to access your account
+          </DialogDescription>
+        </DialogHeader>
+        <form className="grid gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-2">
               <Label htmlFor="identifier">Email or Username</Label>
               <Input
@@ -108,37 +114,7 @@ export default function LoginPage() {
               Sign up
             </Link>
           </div>
-
-          <p className="px-8 text-center text-sm text-muted-foreground">
-            By clicking continue, you agree to our{" "}
-            <Link
-              href="/terms"
-              className="underline underline-offset-4 hover:text-primary"
-            >
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/privacy"
-              className="underline underline-offset-4 hover:text-primary"
-            >
-              Privacy Policy
-            </Link>
-            .
-          </p>
-        </div>
-      </div>
-
-      <div className="hidden bg-muted lg:block">
-        <Image
-          src="https://picsum.photos/1200/900"
-          alt="Background"
-          width={1920}
-          height={1080}
-          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          priority
-        />
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

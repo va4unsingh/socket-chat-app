@@ -86,9 +86,6 @@ const signUp = async (req: Request, res: Response) => {
     }
 
     const user = await User.create({
-      // firstname,
-      // lastname,
-      // username,
       email,
       password,
     });
@@ -135,9 +132,6 @@ const signUp = async (req: Request, res: Response) => {
       success: true,
       user: {
         id: user._id,
-        // firstname: user.firstname,
-        // lastname: user.lastname,
-        // username: user.username,
         email: user.email,
         isVerified: user.isVerified,
       },
@@ -776,15 +770,15 @@ const updateAccountDetails = async (req: Request, res: Response) => {
       });
     }
 
-    const { email } = parsedBody.data;
+    const { email, firstname, lastname, username } = parsedBody.data;
 
     const user = await User.findByIdAndUpdate(
       req.user?._id,
       {
         $set: {
-          // firstname,
-          // lastname,
-          // username,
+          firstname,
+          lastname,
+          username,
           email,
         },
       },

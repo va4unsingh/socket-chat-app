@@ -57,28 +57,16 @@ export const forgotPasswordSchema = z.object({
 });
 
 export const updateAccountSchema = z.object({
-  // firstname: z
-  //   .string()
-  //   .min(1, "First name is required")
-  //   .max(50, "First name cannot exceed 50 characters")
-  //   .trim()
-  //   .optional(),
-  // lastname: z
-  //   .string()
-  //   .min(1, "Last name is required")
-  //   .max(50, "Last name cannot exceed 50 characters")
-  //   .trim()
-  //   .optional(),
-  // username: z
-  //   .string()
-  //   .min(3, "Username must be at least 3 characters")
-  //   .max(30, "Username cannot exceed 30 characters")
-  //   .toLowerCase()
-  //   .regex(
-  //     /^[a-zA-Z0-9_]+$/,
-  //     "Username can only contain letters, numbers, and underscores"
-  //   )
-  //   .optional(),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username cannot exceed 30 characters")
+    .toLowerCase()
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers, and underscores"
+    )
+    .optional(),
   email: z.email("Please enter a valid email").toLowerCase().trim().optional(),
 });
 
@@ -102,3 +90,4 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+Schema>;

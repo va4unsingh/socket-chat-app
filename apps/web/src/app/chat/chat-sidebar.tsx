@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -14,13 +13,10 @@ import { SheetClose } from '@/components/ui/sheet';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/redux/store';
 import { ProfileDialog } from '@/components/profile-dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function ChatSidebar({ strangerName, children }: { strangerName: string, children?: React.ReactNode }) {
     const user = useSelector((state: RootState) => state.user.user);
-
-    if (!user) {
-        return null;
-    }
 
     return (
         <div className="w-full h-full flex flex-col bg-card/50 pt-[env(safe-area-inset-top)] pb-6 pb-[env(safe-area-inset-bottom)]">
@@ -29,17 +25,29 @@ export function ChatSidebar({ strangerName, children }: { strangerName: string, 
                  <div className="p-4">
                     <Tabs defaultValue="chats" className="w-full flex flex-col flex-1">
                         <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="chats">
-                                <MessageSquare className="h-4 w-4 mr-2"/>
-                                Chats
-                            </TabsTrigger>
-                            <TabsTrigger value="friends">
-                                <Users className="h-4 w-4 mr-2"/>
-                                Friends
-                            </TabsTrigger>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <TabsTrigger value="chats" disabled={!user}>
+                                            <MessageSquare className="h-4 w-4 mr-2"/>
+                                            Chats
+                                        </TabsTrigger>
+                                    </TooltipTrigger>
+                                    {!user && <TooltipContent>Login to view your chats</TooltipContent>}
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <TabsTrigger value="friends" disabled={!user}>
+                                            <Users className="h-4 w-4 mr-2"/>
+                                            Friends
+                                        </TabsTrigger>
+                                    </TooltipTrigger>
+                                    {!user && <TooltipContent>Login to manage your friends</TooltipContent>}
+                                </Tooltip>
+                            </TooltipProvider>
                         </TabsList>
                         <TabsContent value="chats" className="flex-1 flex flex-col gap-4 mt-4">
-                            <Button variant="outline" className="w-full">
+                            <Button variant="outline" className="w-full" disabled={!user}>
                             <MessageSquare className="h-4 w-4 mr-2"/>
                                 New Chat
                             </Button>
@@ -51,7 +59,7 @@ export function ChatSidebar({ strangerName, children }: { strangerName: string, 
                             </div>
                         </TabsContent>
                         <TabsContent value="friends" className="flex-1 flex flex-col gap-4 mt-4">
-                            <Button variant="outline" className="w-full">
+                            <Button variant="outline" className="w-full" disabled={!user}>
                             <UserPlus className="h-4 w-4 mr-2"/>
                                 Add Friend
                             </Button>
@@ -79,18 +87,30 @@ export function ChatSidebar({ strangerName, children }: { strangerName: string, 
                     </CardContent>
                 </Card>
                 <div className="flex items-center justify-between gap-3 p-3 bg-transparent border-0 shadow-none rounded-lg">
-                    <ProfileDialog>
-                        <div className='flex items-center gap-3 cursor-pointer'>
+                    {user ? (
+                        <ProfileDialog>
+                            <div className='flex items-center gap-3 cursor-pointer'>
+                                <Avatar className="h-10 w-10">
+                                    <AvatarImage src={user.avatar || undefined} data-ai-hint="person face" />
+                                    <AvatarFallback>{user.username ? user.username.substring(0, 2) : ''}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-semibold">{user.username}</p>
+                                    <p className="text-xs text-muted-foreground">Free User</p>
+                                </div>
+                            </div>
+                        </ProfileDialog>
+                    ) : (
+                        <div className='flex items-center gap-3'>
                             <Avatar className="h-10 w-10">
-                                <AvatarImage src={user.avatar || undefined} data-ai-hint="person face" />
-                                <AvatarFallback>{user.username ? user.username.substring(0, 2) : ''}</AvatarFallback>
+                                <AvatarFallback>G</AvatarFallback>
                             </Avatar>
                             <div>
-                                <p className="font-semibold">{user.username}</p>
-                                <p className="text-xs text-muted-foreground">Free User</p>
+                                <p className="font-semibold">Guest</p>
+                                <p className="text-xs text-muted-foreground">Anonymous User</p>
                             </div>
                         </div>
-                    </ProfileDialog>
+                    )}
                     <SettingsDialog>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                             <Settings className="h-4 w-4" />

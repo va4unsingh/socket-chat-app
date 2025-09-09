@@ -10,18 +10,20 @@ import { SettingsDialog } from './settings-dialog';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/lib/redux/store';
-import { logout } from '@/lib/redux/slices/userSlice';
+import { RootState, AppDispatch } from '@/lib/redux/store';
+import { logoutUser } from '@/lib/redux/slices/userSlice';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 export function Header() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user.user);
   const status = useSelector((state: RootState) => state.user.status);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleSignOut = () => {
-    dispatch(logout());
+    dispatch(logoutUser());
+    toast.success('Signed out successfully!');
   }
 
   const navLinks = [

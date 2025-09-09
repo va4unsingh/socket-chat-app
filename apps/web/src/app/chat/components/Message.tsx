@@ -58,35 +58,33 @@ export function Message({ message, username, avatar, status, handleReaction }: M
                                 )}
                             </div>
                         )}
-                        {message.sender !== 'system' && (
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className={cn("h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity mx-1", {
-                                        })}
-                                    >
-                                        <Smile className="h-4 w-4" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-1">
-                                    <div className="flex gap-1">
-                                        {EMOJI_REACTIONS.map(emoji => (
-                                            <Button
-                                                key={emoji}
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 rounded-full"
-                                                onClick={() => handleReaction(message.id, emoji)}
-                                            >
-                                                {emoji}
-                                            </Button>
-                                        ))}
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
-                        )}
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={cn("h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity mx-1", {
+                                    })}
+                                >
+                                    <Smile className="h-4 w-4" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-1">
+                                <div className="flex gap-1">
+                                    {EMOJI_REACTIONS.map(emoji => (
+                                        <Button
+                                            key={emoji}
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 rounded-full"
+                                            onClick={() => handleReaction(message.id, emoji)}
+                                        >
+                                            {emoji}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </PopoverContent>
+                        </Popover>
                     </div>
                 )}
                 {message.sender === 'user' && (
