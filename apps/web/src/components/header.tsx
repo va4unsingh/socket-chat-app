@@ -7,21 +7,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, LogOut, Settings, Menu } from 'lucide-react';
 import { SettingsDialog } from './settings-dialog';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/redux/store';
-import { logout, initializeUser } from '@/lib/redux/slices/userSlice';
+import { logout } from '@/lib/redux/slices/userSlice';
 
 export function Header() {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   const status = useSelector((state: RootState) => state.user.status);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-  useEffect(() => {
-    dispatch(initializeUser());
-  }, [dispatch]);
 
   const handleSignOut = () => {
     dispatch(logout());
